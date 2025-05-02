@@ -224,7 +224,7 @@ export default function ChatInterface() {
 
         // Format the AI response for better readability
          const formattedResponse = (
-            <div className="space-y-3 text-sm"> {/* Consistent spacing and font size */}
+            <div className="space-y-3 text-sm text-card-foreground"> {/* Adjusted text color */}
                 {response.directAnswer && ( // Show direct answer first if available
                     <div>
                         <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><MessageSquareQuote size={16}/> Answer:</h3> {/* Use MessageSquareQuote */}
@@ -280,11 +280,11 @@ export default function ChatInterface() {
   // Show loading indicator while checking for details/redirecting
   if (initialLoading) {
      return (
-        // Use the global Loading component styling
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/80 to-background backdrop-blur-sm">
-            <div className="flex flex-col items-center space-y-6 text-center p-8 bg-card/80 rounded-lg shadow-2xl max-w-sm">
+        // Use the global Loading component styling, adjusted for dark theme
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-gradient-to-br from-background/95 via-secondary/80 to-background/95 backdrop-blur-md">
+            <div className="flex flex-col items-center space-y-6 text-center p-8 bg-card/90 rounded-lg shadow-2xl max-w-sm border border-border/50">
                 <div className="relative">
-                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-50" />
+                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-70" />
                 <Sparkles className="absolute inset-0 m-auto h-12 w-12 text-accent animate-pulse" />
                 </div>
                 <p className="text-2xl font-semibold text-primary animate-pulse">
@@ -311,27 +311,28 @@ export default function ChatInterface() {
               } animate-in fade-in duration-300`}
             >
               {message.sender === "ai" && (
-                <Avatar className="h-8 w-8 border border-accent shrink-0"> {/* Added shrink-0 */}
-                  {/* Placeholder image path, replace if you have one */}
+                 <Avatar className="h-8 w-8 border border-accent shrink-0">
                   <AvatarImage src="/placeholder-avatar.png" alt="AI Avatar" data-ai-hint="robot nebula avatar" />
-                   <AvatarFallback className="bg-primary text-primary-foreground">
+                  {/* Adjusted fallback for dark theme */}
+                   <AvatarFallback className="bg-secondary text-secondary-foreground">
                     <Sparkles size={16} />
                   </AvatarFallback>
                 </Avatar>
               )}
               <div
-                className={`rounded-lg p-3 max-w-xs md:max-w-md lg:max-w-lg shadow-md break-words ${
+                 className={`rounded-lg p-3 max-w-xs md:max-w-md lg:max-w-lg shadow-md break-words ${
                   message.sender === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card text-card-foreground border" // Use card style for AI
+                    ? "bg-accent text-accent-foreground" // User messages use accent color
+                    : "bg-card text-card-foreground border border-border/50" // AI messages use card style
                 }`}
               >
                  {/* Render string or React node */}
                  {message.text}
               </div>
               {message.sender === "user" && (
-                <Avatar className="h-8 w-8 shrink-0"> {/* Added shrink-0 */}
-                   <AvatarFallback className="bg-accent text-accent-foreground">U</AvatarFallback>
+                <Avatar className="h-8 w-8 shrink-0">
+                   {/* Adjusted fallback for dark theme */}
+                   <AvatarFallback className="bg-primary text-primary-foreground">U</AvatarFallback>
                 </Avatar>
               )}
             </div>
@@ -340,11 +341,13 @@ export default function ChatInterface() {
              <div key={`loading-indicator`} className="flex items-start gap-3 justify-start animate-pulse">
               <Avatar className="h-8 w-8 border border-accent shrink-0">
                  <AvatarImage src="/placeholder-avatar.png" alt="AI Avatar" />
-                 <AvatarFallback className="bg-primary text-primary-foreground">
+                 {/* Adjusted fallback for dark theme */}
+                 <AvatarFallback className="bg-secondary text-secondary-foreground">
                    <Sparkles size={16} />
                  </AvatarFallback>
               </Avatar>
-              <div className="rounded-lg p-3 bg-secondary text-secondary-foreground shadow-md flex items-center space-x-2">
+              {/* Adjusted loading bubble style */}
+              <div className="rounded-lg p-3 bg-secondary/50 text-muted-foreground shadow-md flex items-center space-x-2 border border-border/30">
                 <Loader2 className="h-5 w-5 animate-spin text-accent" />
                 {/* Optional typing indicator text */}
                 {/* <span className="text-sm">Consulting the stars...</span> */}
@@ -362,10 +365,10 @@ export default function ChatInterface() {
                 {promptSuggestions.map((prompt, index) => (
                     <Button
                     key={index}
-                    variant="outline"
+                    variant="outline" // Outline variant uses border color defined in theme
                     size="sm"
                     onClick={() => handlePromptClick(prompt)}
-                    className="bg-background hover:bg-accent/10 border-accent/50 text-accent hover:text-accent transition-colors duration-200 shadow-sm hover:shadow-md text-xs px-2 py-1 h-auto" // Smaller suggestions
+                    className="border-accent/70 text-accent hover:bg-accent/10 hover:text-accent transition-colors duration-200 shadow-sm hover:shadow-md text-xs px-2 py-1 h-auto" // Adjusted suggestion button style
                     >
                     {prompt}
                     </Button>
@@ -378,14 +381,14 @@ export default function ChatInterface() {
       {/* Input Area */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-2 border-t pt-4 border-border/50"
+        className="flex items-center gap-2 border-t pt-4 border-border/50" // Use theme border color
       >
         <Input
           type="text"
           placeholder="Ask the cosmos..." // Changed placeholder
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-grow focus-visible:ring-accent"
+          className="flex-grow focus-visible:ring-accent bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground" // Adjusted input style for dark theme
           disabled={isLoading || initialLoading} // Also disable during initial check
           aria-label="Chat input"
         />

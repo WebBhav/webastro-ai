@@ -21,6 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // Removed dark class here, as dark is the default theme in globals.css
     <html lang="en">
       {/* Use GeistSans variable font. If GeistMono is needed and installed, add it back. */}
       <body className={`${GeistSans.variable} antialiased font-sans`}>

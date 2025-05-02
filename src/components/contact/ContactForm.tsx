@@ -111,12 +111,14 @@ export function ContactForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Your Name</FormLabel>
+              <FormLabel className="text-muted-foreground">Your Name</FormLabel> {/* Adjusted label color */}
               <FormControl>
+                {/* Adjusted input style for dark theme */}
                 <Input
                   placeholder="e.g., Ada Lovelace"
                   {...field}
                   disabled={isLoading || isSubmitted}
+                   className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -129,13 +131,15 @@ export function ContactForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Your Email</FormLabel>
+              <FormLabel className="text-muted-foreground">Your Email</FormLabel> {/* Adjusted label color */}
               <FormControl>
+                {/* Adjusted input style for dark theme */}
                 <Input
                   placeholder="e.g., ada@example.com"
                   {...field}
                   type="email"
                   disabled={isLoading || isSubmitted}
+                   className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -148,17 +152,18 @@ export function ContactForm() {
           name="message"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Your Message</FormLabel>
+              <FormLabel className="text-muted-foreground">Your Message</FormLabel> {/* Adjusted label color */}
               <FormControl>
+                {/* Adjusted textarea style for dark theme */}
                 <Textarea
                   placeholder="Tell us how we can help..."
-                  className="resize-none"
+                  className="resize-none bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                   rows={5}
                   {...field}
                   disabled={isLoading || isSubmitted}
                 />
               </FormControl>
-               <FormDescription>
+               <FormDescription className="text-muted-foreground/80"> {/* Adjusted description color */}
                 Max 500 characters.
               </FormDescription>
               <FormMessage />
@@ -166,7 +171,8 @@ export function ContactForm() {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading || isSubmitted}>
+        {/* Adjusted button style */}
+        <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isLoading || isSubmitted}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,7 +189,8 @@ export function ContactForm() {
 
         {/* Display after submission (for demo) */}
         {isSubmitted && (
-            <Alert variant="default" className="mt-6 bg-accent/10 border-accent/50">
+            // Adjusted alert style for dark theme
+            <Alert variant="default" className="mt-6 bg-secondary/50 border-accent/50 text-accent">
               <Mail className="h-4 w-4 text-accent" />
               <AlertTitle className="text-accent font-semibold">Thank You!</AlertTitle>
               <AlertDescription className="text-accent/90">
@@ -193,7 +200,7 @@ export function ContactForm() {
                     href={generateMailtoLink(form.getValues())}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline font-medium mt-2 inline-block hover:text-accent"
+                    className="underline font-medium mt-2 inline-block hover:text-accent/80" // Adjusted hover color
                 >
                     Click here to email us directly
                 </a>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -136,14 +137,15 @@ export function BirthDetailsForm() {
           name="birthDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Birth Date</FormLabel>
+              <FormLabel className="text-muted-foreground">Birth Date</FormLabel> {/* Adjusted label color */}
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
+                    {/* Adjusted button style */}
                     <Button
                       variant={'outline'}
                       className={cn(
-                        'w-full pl-3 text-left font-normal',
+                        'w-full pl-3 text-left font-normal bg-secondary/50 border-border/60 text-foreground hover:bg-accent/10',
                         !field.value && 'text-muted-foreground'
                       )}
                       disabled={isLoading} // Disable during loading
@@ -157,6 +159,7 @@ export function BirthDetailsForm() {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
+                 {/* Calendar popover content will inherit dark theme */}
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
@@ -172,7 +175,7 @@ export function BirthDetailsForm() {
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>Your date of birth.</FormDescription>
+              <FormDescription className="text-muted-foreground/80">Your date of birth.</FormDescription> {/* Adjusted description color */}
               <FormMessage />
             </FormItem>
           )}
@@ -183,17 +186,18 @@ export function BirthDetailsForm() {
           name="birthTime"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Birth Time (HH:MM)</FormLabel>
+              <FormLabel className="text-muted-foreground">Birth Time (HH:MM)</FormLabel> {/* Adjusted label color */}
               <FormControl>
+                {/* Adjusted input style */}
                 <Input
                   placeholder="e.g., 14:30"
                   {...field}
                   type="time" // Use time input type for better UX on supported browsers
-                  className="[&::-webkit-calendar-picker-indicator]:bg-transparent [&::-webkit-datetime-edit-hour-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-minute-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-ampm-field:focus]:bg-accent/20" // Basic styling attempt for time input parts
+                  className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground [&::-webkit-calendar-picker-indicator]:bg-transparent [&::-webkit-datetime-edit-hour-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-minute-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-ampm-field:focus]:bg-accent/20" // Basic styling attempt for time input parts
                   disabled={isLoading} // Disable during loading
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-muted-foreground/80"> {/* Adjusted description color */}
                 Enter the time in 24-hour format (e.g., 2:30 PM is 14:30).
               </FormDescription>
               <FormMessage />
@@ -206,15 +210,17 @@ export function BirthDetailsForm() {
           name="birthLocation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Birth Location</FormLabel>
+              <FormLabel className="text-muted-foreground">Birth Location</FormLabel> {/* Adjusted label color */}
               <FormControl>
+                {/* Adjusted input style */}
                 <Input
                   placeholder="e.g., London, UK"
                   {...field}
                   disabled={isLoading} // Disable during loading
+                  className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-muted-foreground/80"> {/* Adjusted description color */}
                 The city and country/state where you were born.
               </FormDescription>
               <FormMessage />
@@ -227,7 +233,7 @@ export function BirthDetailsForm() {
           name="language"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Language</FormLabel>
+              <FormLabel className="text-muted-foreground">Language</FormLabel> {/* Adjusted label color */}
                <Select
                   onValueChange={(value) => {
                     field.onChange(value); // Update react-hook-form state
@@ -237,11 +243,13 @@ export function BirthDetailsForm() {
                   disabled={isLoading}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    {/* Adjusted trigger style */}
+                    <SelectTrigger className="bg-secondary/50 border-border/60 text-foreground hover:bg-accent/10">
                        <Languages className="mr-2 h-4 w-4 text-muted-foreground" /> {/* Icon */}
                        <SelectValue placeholder="Select Language" >{selectedLanguageLabel}</SelectValue> {/* Use state for display */}
                     </SelectTrigger>
                   </FormControl>
+                  {/* Select content will inherit dark theme */}
                   <SelectContent>
                     {LANGUAGES.map((lang) => (
                       <SelectItem key={lang.value} value={lang.value}>
@@ -250,7 +258,7 @@ export function BirthDetailsForm() {
                     ))}
                   </SelectContent>
                 </Select>
-              <FormDescription>
+              <FormDescription className="text-muted-foreground/80"> {/* Adjusted description color */}
                 Select the language for your astrological insights.
               </FormDescription>
               <FormMessage />
@@ -258,7 +266,8 @@ export function BirthDetailsForm() {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        {/* Adjusted button style */}
+        <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isLoading}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

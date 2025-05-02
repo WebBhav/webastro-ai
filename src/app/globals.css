@@ -7,42 +7,8 @@ body {
 }
 
 @layer base {
+  /* Dark Theme as Default */
   :root {
-    --background: 210 29% 95%; /* Light Celestial White */
-    --foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --card: 210 29% 95%; /* Light Celestial White */
-    --card-foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --popover: 210 29% 95%; /* Light Celestial White */
-    --popover-foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --primary: 228 65% 15%; /* Deep Midnight Blue */
-    --primary-foreground: 210 29% 95%; /* Light Celestial White */
-    --secondary: 210 16% 93%; /* Adjusted light gray */
-    --secondary-foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --muted: 210 16% 93%; /* Adjusted light gray */
-    --muted-foreground: 228 20% 45%; /* Adjusted muted text color */
-    --accent: 45 100% 50%; /* Gold */
-    --accent-foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 228 20% 85%; /* Adjusted border color */
-    --input: 228 20% 85%; /* Adjusted input border color */
-    --ring: 45 100% 50%; /* Gold */
-    --chart-1: 45 100% 50%; /* Gold */
-    --chart-2: 228 65% 35%; /* Adjusted Deep Midnight Blue */
-    --chart-3: 228 65% 55%; /* Adjusted Deep Midnight Blue */
-    --chart-4: 210 29% 85%; /* Adjusted Light Celestial White */
-    --chart-5: 210 16% 75%; /* Adjusted light gray */
-    --radius: 0.5rem;
-    --sidebar-background: 228 65% 15%; /* Deep Midnight Blue */
-    --sidebar-foreground: 210 29% 95%; /* Light Celestial White */
-    --sidebar-primary: 45 100% 50%; /* Gold */
-    --sidebar-primary-foreground: 228 65% 15%; /* Deep Midnight Blue */
-    --sidebar-accent: 228 65% 25%; /* Darker Midnight Blue for accent */
-    --sidebar-accent-foreground: 210 29% 95%; /* Light Celestial White */
-    --sidebar-border: 228 65% 30%; /* Slightly lighter border */
-    --sidebar-ring: 45 100% 50%; /* Gold */
-  }
-  .dark {
     --background: 228 65% 15%; /* Deep Midnight Blue */
     --foreground: 210 29% 95%; /* Light Celestial White */
     --card: 228 65% 15%; /* Deep Midnight Blue */
@@ -75,6 +41,43 @@ body {
     --sidebar-accent-foreground: 210 29% 95%; /* Light Celestial White */
     --sidebar-border: 228 65% 25%; /* Slightly lighter border */
     --sidebar-ring: 45 100% 50%; /* Gold */
+    --radius: 0.5rem;
+  }
+
+  /* Light Theme (can be activated with a class if needed later) */
+  .light {
+    --background: 210 29% 95%; /* Light Celestial White */
+    --foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --card: 210 29% 95%; /* Light Celestial White */
+    --card-foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --popover: 210 29% 95%; /* Light Celestial White */
+    --popover-foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --primary: 228 65% 15%; /* Deep Midnight Blue */
+    --primary-foreground: 210 29% 95%; /* Light Celestial White */
+    --secondary: 210 16% 93%; /* Adjusted light gray */
+    --secondary-foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --muted: 210 16% 93%; /* Adjusted light gray */
+    --muted-foreground: 228 20% 45%; /* Adjusted muted text color */
+    --accent: 45 100% 50%; /* Gold */
+    --accent-foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 228 20% 85%; /* Adjusted border color */
+    --input: 228 20% 85%; /* Adjusted input border color */
+    --ring: 45 100% 50%; /* Gold */
+    --chart-1: 45 100% 50%; /* Gold */
+    --chart-2: 228 65% 35%; /* Adjusted Deep Midnight Blue */
+    --chart-3: 228 65% 55%; /* Adjusted Deep Midnight Blue */
+    --chart-4: 210 29% 85%; /* Adjusted Light Celestial White */
+    --chart-5: 210 16% 75%; /* Adjusted light gray */
+    --sidebar-background: 228 65% 15%; /* Deep Midnight Blue */
+    --sidebar-foreground: 210 29% 95%; /* Light Celestial White */
+    --sidebar-primary: 45 100% 50%; /* Gold */
+    --sidebar-primary-foreground: 228 65% 15%; /* Deep Midnight Blue */
+    --sidebar-accent: 228 65% 25%; /* Darker Midnight Blue for accent */
+    --sidebar-accent-foreground: 210 29% 95%; /* Light Celestial White */
+    --sidebar-border: 228 65% 30%; /* Slightly lighter border */
+    --sidebar-ring: 45 100% 50%; /* Gold */
   }
 }
 
@@ -103,4 +106,52 @@ body {
 
 .slide-up {
   animation: slideUp 0.5s ease-in-out;
+}
+
+
+/* Star background animation */
+@keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+@-webkit-keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+@-moz-keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+@-ms-keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+
+.stars, .twinkling {
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.stars {
+  background:#000 url(https://www.script-tutorials.com/demos/360/images/stars.png) repeat top center;
+  z-index:0;
+   opacity: 0.3; /* Adjust opacity */
+}
+
+.twinkling{
+  background:transparent url(https://www.script-tutorials.com/demos/360/images/twinkling.png) repeat top center;
+  z-index:1;
+  opacity: 0.3; /* Adjust opacity */
+
+  -moz-animation:move-twink-back 200s linear infinite;
+  -ms-animation:move-twink-back 200s linear infinite;
+  -o-animation:move-twink-back 200s linear infinite;
+  -webkit-animation:move-twink-back 200s linear infinite;
+  animation:move-twink-back 200s linear infinite;
 }

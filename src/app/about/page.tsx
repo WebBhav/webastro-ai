@@ -5,11 +5,13 @@ import { Sparkles, BrainCircuit, Users } from "lucide-react"; // Import relevant
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-secondary/50">
+    // Adjusted gradient for dark theme
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-secondary/50 text-foreground">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-3xl mx-auto space-y-12">
-          <Card className="shadow-lg bg-card fade-in">
+          {/* Adjusted card styles for dark theme */}
+          <Card className="shadow-lg bg-card border border-border/50 fade-in">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <Sparkles className="h-16 w-16 text-accent animate-pulse" />
@@ -29,7 +31,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-md bg-card fade-in" style={{animationDelay: '0.2s'}}>
+          <Card className="shadow-md bg-card border border-border/50 fade-in" style={{animationDelay: '0.2s'}}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-primary">
                 <BrainCircuit className="h-6 w-6 text-accent" />
@@ -46,7 +48,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-md bg-card fade-in" style={{animationDelay: '0.4s'}}>
+          <Card className="shadow-md bg-card border border-border/50 fade-in" style={{animationDelay: '0.4s'}}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-primary">
                 <Users className="h-6 w-6 text-accent" />

@@ -7,44 +7,52 @@ import { Header } from "@/components/layout/Header"; // Import Header
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen"> {/* Ensure parent div takes full height */}
+    <div className="flex flex-col min-h-screen bg-background text-foreground"> {/* Ensure parent div takes full height and sets base text color */}
       <Header /> {/* Add the Header component */}
-      <main className="flex flex-col items-center justify-center flex-grow p-4 md:p-8 bg-gradient-to-b from-background to-secondary/50"> {/* Changed to main and added flex-grow */}
-        <div className="container mx-auto flex flex-col lg:flex-row items-center gap-8 text-center lg:text-left fade-in">
+      <main className="flex flex-col items-center justify-center flex-grow p-4 md:p-8 bg-gradient-to-b from-background to-secondary/50 relative overflow-hidden"> {/* Changed to main and added flex-grow, relative positioning */}
+
+        {/* Star Background Layers */}
+        <div className="stars"></div>
+        <div className="twinkling"></div>
+
+        <div className="container mx-auto flex flex-col lg:flex-row items-center gap-8 text-center lg:text-left fade-in relative z-10"> {/* Ensure content is above stars */}
           {/* Left Content: Text & Button */}
           <div className="flex-1 flex flex-col items-center lg:items-start space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary slide-up" style={{ animationDelay: '0.1s' }}>
-              Unlock Your Cosmic Potential with <span className="text-accent">WebAstro AI</span>
-            </h1>
+            <div className="relative"> {/* Wrapper for title and stars */}
+               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary slide-up relative z-10" style={{ animationDelay: '0.1s' }}> {/* Ensure title is above stars */}
+                Unlock Your Cosmic Potential with <span className="text-accent">WebAstro AI</span>
+               </h1>
+            </div>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl slide-up" style={{ animationDelay: '0.2s' }}>
               Discover personalized astrological insights powered by cutting-edge AI. Explore your birth chart, understand planetary influences, and navigate your life path with clarity.
             </p>
             <Link href="/get-started" passHref className="slide-up" style={{ animationDelay: '0.3s' }}>
-              <Button size="lg" className="mt-4 shadow-lg transform transition hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
+              <Button size="lg" className="mt-4 shadow-lg transform transition hover:scale-105 hover:shadow-xl duration-300 ease-in-out bg-primary text-primary-foreground hover:bg-primary/90"> {/* Adjusted button colors for dark theme */}
                 <Rocket className="mr-2 h-5 w-5" /> Try it now
               </Button>
             </Link>
           </div>
 
           {/* Right Content: Hero Image */}
-          <div className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0 slide-up" style={{ animationDelay: '0.4s' }}>
+          <div className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0 slide-up relative z-10" style={{ animationDelay: '0.4s' }}> {/* Ensure image is above stars */}
             <Image
               src="https://picsum.photos/600/400"
               alt="Astrology illustration with stars and planets"
               data-ai-hint="astrology stars planets cosmos"
               width={600}
               height={400}
-              className="rounded-lg shadow-2xl object-cover"
+              className="rounded-lg shadow-2xl object-cover border-2 border-accent/50" // Added subtle border
               priority
             />
           </div>
         </div>
 
         {/* SEO Section */}
-        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in" style={{ animationDelay: '0.5s' }}>
+        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.5s' }}> {/* Ensure section is above stars */}
           <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">Why WebAstro AI?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-card shadow-md hover:shadow-lg transition-shadow duration-300">
+            {/* Adjusted card styles for dark theme */}
+            <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain-circuit"><path d="M12 5a3 3 0 1 0-5.997.142"/><path d="M18 5a3 3 0 1 0-5.997.142"/><path d="M12 13a3 3 0 1 0 5.997-.142"/><path d="M6 13a3 3 0 1 0 5.997-.142"/><path d="M12 21a3 3 0 1 0 .142-5.997"/><path d="M6 5h.01"/><path d="M18 5h.01"/><path d="M12 13h.01"/><path d="M6 13h.01"/><path d="M18 13h.01"/><path d="M12 21v-6"/><path d="M12 5v6"/><path d="M6 5v6.01"/><path d="M18 5v6.01"/><path d="M6 13v2"/><path d="M18 13v2"/><path d="m14.6 10.5-.7-.7"/><path d="m10.1 10.5-.7-.7"/><path d="m14.6 18.5-.7-.7"/><path d="m10.1 18.5-.7-.7"/></svg>
@@ -55,7 +63,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Leverage the power of Gemini 2.0 Flash for deep, personalized astrological readings and interpretations. Understand complex astrological concepts easily.</p>
               </CardContent>
             </Card>
-            <Card className="bg-card shadow-md hover:shadow-lg transition-shadow duration-300">
+             <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
@@ -66,7 +74,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Go beyond generic horoscopes. Get insights tailored to your unique birth chart, helping you understand your strengths, challenges, and life purpose.</p>
               </CardContent>
             </Card>
-            <Card className="bg-card shadow-md hover:shadow-lg transition-shadow duration-300">
+             <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -86,7 +94,7 @@ export default function Home() {
       </main> {/* End of main content */}
 
       {/* Footer */}
-      <footer className="w-full mt-16 md:mt-24 py-6 border-t border-border/50 fade-in" style={{ animationDelay: '0.6s' }}>
+      <footer className="w-full mt-16 md:mt-24 py-6 border-t border-border/50 fade-in relative z-10" style={{ animationDelay: '0.6s' }}> {/* Ensure footer is above stars */}
         <div className="container mx-auto text-center text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} WebAstro AI. All rights reserved.</p>
         </div>

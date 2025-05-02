@@ -26,12 +26,13 @@ export function Header() {
   const pathname = usePathname(); // Get the current pathname
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    // Adjusted header style for dark theme
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-14 max-w-screen-2xl items-center justify-between"> {/* Changed to justify-between */}
         {/* Logo and Brand */}
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Sparkles className="h-6 w-6 text-accent" />
-          <span className="font-bold text-primary sm:inline-block">
+          <span className="font-bold text-primary sm:inline-block"> {/* Text color uses primary (light white in dark) */}
             WebAstro AI
           </span>
         </Link>
@@ -46,8 +47,8 @@ export function Header() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                        "transition-colors hover:text-foreground/80",
-                        isActive ? "text-foreground font-semibold" : "text-foreground/60" // Apply bold and different color if active
+                        "transition-colors hover:text-primary/80", // Hover uses lighter primary
+                        isActive ? "text-primary font-semibold" : "text-primary/60" // Active uses primary, inactive uses faded primary
                     )}
                     onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu if open
                     >
@@ -64,7 +65,7 @@ export function Header() {
                    <Button
                      variant={pathname.startsWith('/get-started') || pathname.startsWith('/chat') ? "default" : "default"} // Keep default variant, could add active style if needed
                      size="sm"
-                     className="bg-accent text-accent-foreground hover:bg-accent/90" // Adjusted button style
+                     className="bg-accent text-accent-foreground hover:bg-accent/90" // Accent button style should work well on dark
                     >
                      <MessageSquare className="mr-2 h-4 w-4" /> {/* Added Icon */}
                      {CHAT_LINK.label}
@@ -77,22 +78,26 @@ export function Header() {
             <div className="flex items-center md:hidden">
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                     {/* Adjusted button color for dark theme */}
+                    <Button variant="ghost" size="icon" className="text-primary hover:bg-accent/10">
                         <Menu className="h-6 w-6" />
                         <span className="sr-only">Open menu</span>
                     </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-full max-w-xs bg-background p-6">
+                     {/* Adjusted sheet content background */}
+                    <SheetContent side="left" className="w-full max-w-xs bg-background border-border/50 p-6">
                     {/* Add a visually hidden title for accessibility */}
                     <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                     {/* Mobile Menu Header */}
                     <div className="mb-6 flex items-center justify-between">
                         <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                             <Sparkles className="h-6 w-6 text-accent" />
+                             {/* Adjusted text color */}
                             <span className="font-bold text-primary">WebAstro AI</span>
                         </Link>
                         <SheetClose asChild>
-                            <Button variant="ghost" size="icon">
+                             {/* Adjusted button color for dark theme */}
+                            <Button variant="ghost" size="icon" className="text-primary hover:bg-accent/10">
                             <X className="h-6 w-6" />
                             <span className="sr-only">Close menu</span>
                             </Button>
@@ -107,7 +112,7 @@ export function Header() {
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground`, // Base style for all mobile links
+                                            `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-primary hover:bg-accent hover:text-accent-foreground`, // Adjusted base text color
                                             isActive && "bg-accent/10 font-semibold text-accent" // Active style for mobile
                                         )}
                                     >
