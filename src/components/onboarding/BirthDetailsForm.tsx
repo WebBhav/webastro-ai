@@ -157,7 +157,8 @@ export function BirthDetailsForm() {
                       ) : (
                         <span>Pick a date</span>
                       )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      {/* Change icon color to foreground */}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-80 text-foreground" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
