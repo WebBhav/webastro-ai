@@ -39,13 +39,15 @@ import { useToast } from '@/hooks/use-toast';
 // Define the localStorage key
 const BIRTH_DETAILS_STORAGE_KEY = 'webastro_birth_details';
 
-// Supported Languages (can be expanded)
+// Updated Supported Languages
 const LANGUAGES = [
   { value: 'English', label: 'English' },
-  { value: 'Spanish', label: 'Español' },
-  { value: 'French', label: 'Français' },
-  { value: 'German', label: 'Deutsch' },
-  // Add more languages as needed
+  { value: 'Hindi', label: 'Hindi' },
+  { value: 'Kannada', label: 'Kannada' },
+  { value: 'Telugu', label: 'Telugu' },
+  { value: 'Marathi', label: 'Marathi' },
+  { value: 'Gujarati', label: 'Gujarati' },
+  { value: 'Bengali', label: 'Bengali' },
 ];
 
 // Validation schema including language

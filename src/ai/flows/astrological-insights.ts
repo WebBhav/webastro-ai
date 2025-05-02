@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -35,7 +36,7 @@ const GetAstrologicalInsightsInputSchema = z.object({
     ),
   currentLocation: z.string().describe('The current location.'),
   userQuery: z.string().optional().describe('The specific question the user asked.'),
-  language: z.string().optional().default('English').describe('The language for the response (e.g., "English", "Spanish"). Defaults to English.'), // Added language field
+  language: z.string().optional().default('English').describe('The language for the response (e.g., "English", "Hindi", "Kannada"). Defaults to English.'), // Updated language options description
 });
 export type GetAstrologicalInsightsInput = z.infer<typeof GetAstrologicalInsightsInputSchema>;
 
@@ -109,3 +110,4 @@ const astrologicalInsightsFlow = ai.defineFlow<
     return output!;
   }
 );
+
