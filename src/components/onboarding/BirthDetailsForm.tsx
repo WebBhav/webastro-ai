@@ -60,17 +60,17 @@ export function BirthDetailsForm() {
     },
   });
 
-  async function onSubmit(data: BirthDetailsFormValues) {
-    setIsLoading(true);
+  // Separate function to handle actual submission logic
+  const handleFormSubmit = (data: BirthDetailsFormValues) => {
+     setIsLoading(true);
     try {
-      // Format data for storage/use
       const birthDetails = {
         date: format(data.birthDate, 'yyyy-MM-dd'),
         time: data.birthTime,
         location: data.birthLocation,
       };
 
-      // Store in localStorage
+      // Store in localStorage *synchronously*
       localStorage.setItem(BIRTH_DETAILS_STORAGE_KEY, JSON.stringify(birthDetails));
 
       toast({
@@ -78,8 +78,12 @@ export function BirthDetailsForm() {
         description: "We've securely stored your birth details.",
       });
 
-      // Redirect to chat page
-      router.push('/chat');
+       // Use requestAnimationFrame to ensure localStorage write completes before navigation
+       requestAnimationFrame(() => {
+           router.push('/chat');
+           // No need to setIsLoading(false) here as navigation happens
+       });
+
 
     } catch (error) {
       console.error('Error saving birth details:', error);
@@ -90,12 +94,12 @@ export function BirthDetailsForm() {
       });
       setIsLoading(false); // Ensure loading state is reset on error
     }
-    // No need to reset loading state here if navigation occurs
-  }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      {/* Use the handleFormSubmit function in the onSubmit handler */}
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="birthDate"
@@ -111,6 +115,7 @@ export function BirthDetailsForm() {
                         'w-full pl-3 text-left font-normal',
                         !field.value && 'text-muted-foreground'
                       )}
+                      disabled={isLoading} // Disable during loading
                     >
                       {field.value ? (
                         format(field.value, 'PPP')
@@ -153,6 +158,7 @@ export function BirthDetailsForm() {
                   {...field}
                   type="time" // Use time input type for better UX on supported browsers
                   className="[&::-webkit-calendar-picker-indicator]:bg-transparent [&::-webkit-datetime-edit-hour-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-minute-field:focus]:bg-accent/20 [&::-webkit-datetime-edit-ampm-field:focus]:bg-accent/20" // Basic styling attempt for time input parts
+                  disabled={isLoading} // Disable during loading
                 />
               </FormControl>
               <FormDescription>
@@ -169,7 +175,11 @@ export function BirthDetailsForm() {
             <FormItem>
               <FormLabel>Birth Location</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., London, UK" {...field} />
+                <Input
+                  placeholder="e.g., London, UK"
+                  {...field}
+                  disabled={isLoading} // Disable during loading
+                />
               </FormControl>
               <FormDescription>
                 The city and country/state where you were born.
@@ -192,3 +202,4 @@ export function BirthDetailsForm() {
     </Form>
   );
 }
+```

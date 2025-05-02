@@ -38,9 +38,9 @@ const GetAstrologicalInsightsInputSchema = z.object({
 export type GetAstrologicalInsightsInput = z.infer<typeof GetAstrologicalInsightsInputSchema>;
 
 const GetAstrologicalInsightsOutputSchema = z.object({
-  personalityInsights: z.string().describe('In-depth analysis of the user personality.'),
-  lifePathInsights: z.string().describe('Guidance and understanding of the user life path.'),
-  currentTransitInsights: z.string().describe('Insights based on the current planetary positions.'),
+  personalityInsights: z.string().describe('Short, simple analysis of the user personality.'),
+  lifePathInsights: z.string().describe('Simple guidance about the user life path.'),
+  currentTransitInsights: z.string().describe('Simple insights based on current planetary positions.'),
 });
 export type GetAstrologicalInsightsOutput = z.infer<typeof GetAstrologicalInsightsOutputSchema>;
 
@@ -78,12 +78,32 @@ const prompt = ai.definePrompt({
   },
   output: {
     schema: z.object({
-      personalityInsights: z.string().describe('In-depth analysis of the user personality.'),
-      lifePathInsights: z.string().describe('Guidance and understanding of the user life path.'),
-      currentTransitInsights: z.string().describe('Insights based on the current planetary positions.'),
+      personalityInsights: z.string().describe('Short, simple analysis of the user personality.'),
+      lifePathInsights: z.string().describe('Simple guidance about the user life path.'),
+      currentTransitInsights: z.string().describe('Simple insights based on current planetary positions.'),
     }),
   },
-  prompt: `You are an expert astrologer providing personalized astrological insights. Analyze the user's birth chart details and current planetary positions to offer a comprehensive understanding of their personality, life path, and current influences.\n\nBirth Date: {{{birthDate}}}\nBirth Time: {{{birthTime}}}\nBirth Location: {{{birthLocation}}}\nCurrent Date: {{{currentDate}}}\nCurrent Time: {{{currentTime}}}\nCurrent Location: {{{currentLocation}}}\n\nProvide the astrological insights in the following format:\n\n### Personality Insights:\n[In-depth analysis of the user personality based on their birth chart.]\n\n### Life Path Insights:\n[Guidance and understanding of the user life path, including potential challenges and opportunities.]\n\n### Current Transit Insights:\n[Insights based on the current planetary positions and their influence on the user.]`,
+  prompt: `You are an AI Astrologer explaining insights to someone new to astrology. Use SIMPLE, CLEAR language. Avoid jargon. Keep each section CONCISE (1-2 sentences ideally).
+
+Analyze the user's birth chart details and current planetary positions.
+
+Birth Date: {{{birthDate}}}
+Birth Time: {{{birthTime}}}
+Birth Location: {{{birthLocation}}}
+Current Date: {{{currentDate}}}
+Current Time: {{{currentTime}}}
+Current Location: {{{currentLocation}}}
+
+Provide short, easy-to-understand insights in the following format:
+
+### Personality:
+[Simple analysis of the user's core personality based on their birth chart.]
+
+### Life Path:
+[Easy-to-understand guidance about their life path, challenges, and opportunities.]
+
+### Current Influences:
+[Simple insights based on current planetary positions and how they might affect the user right now.]`,
 });
 
 const astrologicalInsightsFlow = ai.defineFlow<
@@ -97,6 +117,10 @@ const astrologicalInsightsFlow = ai.defineFlow<
   },
   async input => {
     const {output} = await prompt(input);
+    // Ensure the output aligns with the simplified schema keys (lowercase first letter)
+    // The prompt asks for specific headings, but the output schema expects lowercase keys.
+    // We might need to adjust either the prompt or handle mapping if the LLM doesn't match exactly.
+    // Assuming the LLM follows the schema description for now.
     return output!;
   }
 );

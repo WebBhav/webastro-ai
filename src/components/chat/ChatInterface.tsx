@@ -2,7 +2,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,23 @@ export default function ChatInterface() {
   const { toast } = useToast();
   const router = useRouter();
 
+  // Function to add a new message to the state
+   const addMessage = useCallback((text: string | React.ReactNode, sender: "user" | "ai", explicitId?: string) => {
+    const id = explicitId || `${sender}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    setMessages((prev) => {
+      // Avoid adding duplicate initial messages if component re-renders
+      if (sender === 'ai' && prev.some(msg => msg.id.startsWith('initial-message-'))) {
+        const existingInitial = prev.find(msg => msg.id.startsWith('initial-message-'));
+        if (existingInitial && existingInitial.text === text) return prev;
+      }
+      return [...prev, { id, text, sender }];
+    });
+    if (sender === 'user') {
+      setShowSuggestions(false); // Hide suggestions after user sends a message
+    }
+  }, []); // Empty dependency array as it doesn't depend on component state directly
+
+
   // Function to fetch prompt suggestions
   const fetchSuggestions = async () => {
     try {
@@ -55,8 +72,8 @@ export default function ChatInterface() {
       // Optionally show default suggestions or an error message
       setPromptSuggestions([
         "Tell me about my personality.",
-        "What are the major themes in my life?",
-        "What's happening for me astrologically right now?",
+        "What's my life path?",
+        "What's happening now?",
       ]);
       setShowSuggestions(true);
     }
@@ -64,36 +81,36 @@ export default function ChatInterface() {
 
   // Load birth details from localStorage and fetch suggestions on mount
   useEffect(() => {
-    const storedDetails = localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY);
-    if (storedDetails) {
-      try {
-        const parsedDetails: BirthDetails = JSON.parse(storedDetails);
-        // Basic validation of loaded data
-        if (parsedDetails.date && parsedDetails.time && parsedDetails.location) {
-          setBirthDetails(parsedDetails);
-          fetchSuggestions(); // Fetch suggestions only if details are loaded
-          addMessage(
-            `Welcome back! Using your saved birth details: ${parsedDetails.date}, ${parsedDetails.time}, ${parsedDetails.location}. Ask me anything!`,
-            "ai",
-            `initial-message-${Date.now()}` // Provide a unique initial ID
-          );
-        } else {
-          // Invalid data found, redirect
-          toast({ title: "Birth details incomplete.", description: "Please re-enter your details.", variant: "destructive"});
-          router.push('/get-started');
-        }
-      } catch (e) {
-         console.error("Failed to parse birth details from storage:", e);
-         toast({ title: "Error loading details.", description: "Please re-enter your details.", variant: "destructive"});
-         router.push('/get-started');
+    let detailsLoaded = false;
+    try {
+      const storedDetails = localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY);
+      if (storedDetails) {
+          const parsedDetails: BirthDetails = JSON.parse(storedDetails);
+          // Basic validation of loaded data
+          if (parsedDetails.date && parsedDetails.time && parsedDetails.location) {
+            setBirthDetails(parsedDetails);
+            detailsLoaded = true;
+            fetchSuggestions(); // Fetch suggestions only if details are loaded
+            addMessage(
+              `Welcome back! Using your saved birth details: ${parsedDetails.date}, ${parsedDetails.time}, ${parsedDetails.location}. How can I help you today?`,
+              "ai",
+              `initial-message-${Date.now()}`
+            );
+          }
       }
-    } else {
-      // No details found, redirect immediately
+    } catch (e) {
+       console.error("Failed to parse birth details from storage:", e);
+       // Don't toast immediately, let the redirect handle it
+    }
+
+    if (!detailsLoaded) {
+      // No details found or invalid, redirect immediately
       toast({ title: "Birth details required.", description: "Please enter your details to start.", variant: "destructive"});
       router.push('/get-started');
+    } else {
+       setInitialLoading(false); // Mark initial check as complete only if details loaded successfully
     }
-    setInitialLoading(false); // Mark initial check as complete
-  }, [router, toast]); // Add router and toast to dependencies
+  }, [router, toast, addMessage]); // Add addMessage here
 
 
   // Scroll to bottom when messages update
@@ -105,20 +122,10 @@ export default function ChatInterface() {
                 top: scrollAreaRef.current.scrollHeight,
                 behavior: "smooth",
             });
-      }, 0);
+      }, 100); // Increased delay slightly
     }
   }, [messages]);
 
-  // Function to add a new message to the state
-  const addMessage = (text: string | React.ReactNode, sender: "user" | "ai", explicitId?: string) => {
-    // Use explicit ID if provided, otherwise generate one.
-    // Add a random suffix to reduce collision chance with Date.now()
-    const id = explicitId || `${Date.now().toString()}-${Math.random().toString(36).substring(7)}`;
-    setMessages((prev) => [...prev, { id: id, text, sender }]);
-     if (sender === 'user') {
-      setShowSuggestions(false); // Hide suggestions after user sends a message
-    }
-  };
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
@@ -131,12 +138,23 @@ export default function ChatInterface() {
     event?.preventDefault();
     const userMessage = promptText || input.trim();
 
-    if (!userMessage || isLoading || !birthDetails) {
-        if(!birthDetails && !initialLoading) {
+     // Re-check birth details *before* making the call
+    const currentDetails = birthDetails ?? JSON.parse(localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY) || 'null');
+
+
+    if (!userMessage || isLoading || !currentDetails) {
+        if(!currentDetails && !initialLoading) {
              toast({ title: "Missing Birth Details", description: "Cannot process request without birth details. Redirecting...", variant: "destructive" });
              router.push('/get-started');
+        } else if (!userMessage) {
+            toast({ title: "Empty Message", description: "Please enter your question.", variant: "destructive" });
         }
-        return; // Don't proceed if loading, no message, or no birth details (after initial check)
+        return; // Don't proceed if loading, no message, or no birth details
+    }
+
+    // Ensure birthDetails state is updated if it wasn't initially
+    if (!birthDetails && currentDetails) {
+        setBirthDetails(currentDetails);
     }
 
 
@@ -148,36 +166,36 @@ export default function ChatInterface() {
          const currentDate = format(new Date(), 'yyyy-MM-dd');
          const currentTime = format(new Date(), 'HH:mm');
          // For simplicity, using birth location as current location. A better app would get current location.
-         const currentLocation = birthDetails.location;
+         const currentLocation = currentDetails.location;
 
         const response = await getAstrologicalInsights({
-            birthDate: birthDetails.date,
-            birthTime: birthDetails.time,
-            birthLocation: birthDetails.location,
+            birthDate: currentDetails.date,
+            birthTime: currentDetails.time,
+            birthLocation: currentDetails.location,
             currentDate: currentDate,
             currentTime: currentTime,
             currentLocation: currentLocation, // Use birth location as current for simplicity
         });
 
-        // Format the AI response for better readability
+        // Format the AI response for better readability (simplified)
          const formattedResponse = (
-            <div className="space-y-4">
+            <div className="space-y-3 text-sm"> {/* Reduced spacing and font size */}
                 {response.personalityInsights && (
                     <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality Insights:</h3>
-                        <p className="text-sm">{response.personalityInsights}</p>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality:</h3>
+                        <p>{response.personalityInsights}</p>
                     </div>
                 )}
                 {response.lifePathInsights && (
                      <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Zap size={16}/> Life Path Insights:</h3>
-                        <p className="text-sm">{response.lifePathInsights}</p>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Zap size={16}/> Life Path:</h3>
+                        <p>{response.lifePathInsights}</p>
                     </div>
                 )}
                 {response.currentTransitInsights && (
                      <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Sparkles size={16}/> Current Transit Insights:</h3>
-                        <p className="text-sm">{response.currentTransitInsights}</p>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Sparkles size={16}/> Current Influences:</h3>
+                        <p>{response.currentTransitInsights}</p>
                     </div>
                 )}
             </div>
@@ -186,10 +204,10 @@ export default function ChatInterface() {
 
     } catch (error) {
       console.error("Error calling AI:", error);
-      addMessage("Sorry, I encountered an error processing your request. Please try again.", "ai");
+      addMessage("Sorry, I had trouble understanding that. Could you try asking in a different way?", "ai");
       toast({
         title: "AI Error",
-        description: "Failed to get astrological insights. Please check the details and try again.",
+        description: "Failed to get astrological insights. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -214,10 +232,10 @@ export default function ChatInterface() {
         <div className="space-y-4">
           {messages.map((message) => (
             <div
-              key={message.id}
+              key={message.id} // Use the unique ID generated in addMessage
               className={`flex items-start gap-3 ${
                 message.sender === "user" ? "justify-end" : "justify-start"
-              } animate-in fade-in duration-300`} // Added fade-in animation
+              } animate-in fade-in duration-300`}
             >
               {message.sender === "ai" && (
                 <Avatar className="h-8 w-8 border border-accent">
@@ -234,11 +252,8 @@ export default function ChatInterface() {
                     : "bg-secondary text-secondary-foreground"
                 }`}
               >
-                 {typeof message.text === 'string' ? (
-                     <p className="text-sm">{message.text}</p>
-                ) : (
-                    message.text // Render React node directly
-                )}
+                 {/* Render string or React node */}
+                 {message.text}
               </div>
               {message.sender === "user" && (
                 <Avatar className="h-8 w-8">
@@ -248,8 +263,7 @@ export default function ChatInterface() {
             </div>
           ))}
           {isLoading && (
-             // Add a unique key to the loading indicator to avoid collision
-            <div key="loading-indicator" className="flex items-start gap-3 justify-start animate-pulse"> {/* Added pulse animation */}
+            <div key={`loading-${Date.now()}`} className="flex items-start gap-3 justify-start animate-pulse">
               <Avatar className="h-8 w-8 border border-accent">
                 <AvatarImage src="/astro-ai-avatar.png" alt="AI Avatar" />
                  <AvatarFallback className="bg-primary text-primary-foreground">
@@ -265,11 +279,11 @@ export default function ChatInterface() {
       </ScrollArea>
 
        {/* Prompt Suggestions */}
-        {showSuggestions && messages.length > 1 && !isLoading && ( // Show only after initial message and not loading
+        {showSuggestions && messages.length > 0 && !isLoading && ( // Conditionally show suggestions
             <div className="mb-4 fade-in">
-                <p className="text-sm text-muted-foreground mb-2 text-center">Or try asking:</p>
+                <p className="text-sm text-muted-foreground mb-2 text-center">Try asking:</p>
                 <div className="flex flex-wrap justify-center gap-2">
-                {promptSuggestions.slice(0, 3).map((prompt, index) => ( // Limit suggestions shown
+                {promptSuggestions.slice(0, 3).map((prompt, index) => (
                     <Button
                     key={index}
                     variant="outline"
@@ -311,4 +325,3 @@ export default function ChatInterface() {
     </div>
   );
 }
-
