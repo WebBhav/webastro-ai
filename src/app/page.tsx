@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from 'next/image';
-import { MessageCircle } from 'lucide-react';
+import { Rocket } from 'lucide-react'; // Changed icon to Rocket
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
@@ -16,9 +16,9 @@ export default function Home() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl slide-up" style={{ animationDelay: '0.2s' }}>
             Discover personalized astrological insights powered by cutting-edge AI. Explore your birth chart, understand planetary influences, and navigate your life path with clarity.
           </p>
-          <Link href="/chat" passHref className="slide-up" style={{ animationDelay: '0.3s' }}>
+          <Link href="/get-started" passHref className="slide-up" style={{ animationDelay: '0.3s' }}>
             <Button size="lg" className="mt-4 shadow-lg transform transition hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
-              <MessageCircle className="mr-2 h-5 w-5" /> Chat Now
+              <Rocket className="mr-2 h-5 w-5" /> Get Started Now
             </Button>
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Your conversations are private. We prioritize your data security and ensure your interactions remain confidential through authorized API access.</p>
+              <p className="text-muted-foreground">Your birth details are stored locally in your browser. Your conversations are private. We prioritize your data security.</p>
             </CardContent>
           </Card>
         </div>

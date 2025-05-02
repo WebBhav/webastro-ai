@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,48 +13,85 @@ import { getPromptSuggestions } from "@/ai/flows/prompt-suggestions";
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
+// Define the localStorage key
+const BIRTH_DETAILS_STORAGE_KEY = 'webastro_birth_details';
+
 interface Message {
   id: string;
   text: string | React.ReactNode; // Allow React nodes for richer formatting
   sender: "user" | "ai";
 }
 
-// Sample prompt suggestions (can be fetched dynamically later)
-const initialPrompts = [
-  "Tell me about my personality based on my birth chart.",
-  "What does my life path look like?",
-  "How are the current planets affecting me?",
-];
+interface BirthDetails {
+  date: string;
+  time: string;
+  location: string;
+}
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [promptSuggestions, setPromptSuggestions] = useState<string[]>(initialPrompts);
-  const [showSuggestions, setShowSuggestions] = useState(true); // Show suggestions initially
-  const [birthDetails, setBirthDetails] = useState<{ date: string, time: string, location: string } | null>(null); // Store user birth details
+  const [promptSuggestions, setPromptSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false); // Hide suggestions initially until details loaded
+  const [birthDetails, setBirthDetails] = useState<BirthDetails | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true); // Track initial loading/redirect check
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
-   // Function to fetch prompt suggestions (can be called on specific events)
-   const fetchSuggestions = async () => {
-    // Example: Fetch general suggestions initially
+  // Function to fetch prompt suggestions
+  const fetchSuggestions = async () => {
     try {
       const response = await getPromptSuggestions({});
       if (response.suggestions && response.suggestions.length > 0) {
         setPromptSuggestions(response.suggestions);
+        setShowSuggestions(true); // Show suggestions after fetching
       }
     } catch (error) {
       console.error("Error fetching prompt suggestions:", error);
-      // Keep default suggestions or show error
+      // Optionally show default suggestions or an error message
+      setPromptSuggestions([
+        "Tell me about my personality.",
+        "What are the major themes in my life?",
+        "What's happening for me astrologically right now?",
+      ]);
+      setShowSuggestions(true);
     }
   };
 
-  // Fetch suggestions on component mount
-   useEffect(() => {
-    // fetchSuggestions(); // Uncomment if you want dynamic suggestions on load
-   }, []);
+  // Load birth details from localStorage and fetch suggestions on mount
+  useEffect(() => {
+    const storedDetails = localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY);
+    if (storedDetails) {
+      try {
+        const parsedDetails: BirthDetails = JSON.parse(storedDetails);
+        // Basic validation of loaded data
+        if (parsedDetails.date && parsedDetails.time && parsedDetails.location) {
+          setBirthDetails(parsedDetails);
+          fetchSuggestions(); // Fetch suggestions only if details are loaded
+          addMessage(
+            `Welcome back! Using your saved birth details: ${parsedDetails.date}, ${parsedDetails.time}, ${parsedDetails.location}. Ask me anything!`,
+            "ai"
+          );
+        } else {
+          // Invalid data found, redirect
+          toast({ title: "Birth details incomplete.", description: "Please re-enter your details.", variant: "destructive"});
+          router.push('/get-started');
+        }
+      } catch (e) {
+         console.error("Failed to parse birth details from storage:", e);
+         toast({ title: "Error loading details.", description: "Please re-enter your details.", variant: "destructive"});
+         router.push('/get-started');
+      }
+    } else {
+      // No details found, redirect immediately
+      toast({ title: "Birth details required.", description: "Please enter your details to start.", variant: "destructive"});
+      router.push('/get-started');
+    }
+    setInitialLoading(false); // Mark initial check as complete
+  }, [router, toast]); // Add router and toast to dependencies
 
 
   // Scroll to bottom when messages update
@@ -76,131 +114,90 @@ export default function ChatInterface() {
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
-    // Optionally, directly send the message after clicking a prompt
+    // Directly send the message after clicking a prompt
     handleSubmit(undefined, prompt);
-     setShowSuggestions(false);
+    setShowSuggestions(false);
   };
-
-   // Simplified request for birth details
-   const requestBirthDetails = () => {
-    addMessage(
-        <div className="space-y-2">
-          <p>To provide personalized insights, I need your birth details:</p>
-          <ul className="list-disc list-inside text-sm">
-            <li>Birth Date (YYYY-MM-DD)</li>
-            <li>Birth Time (HH:MM, 24-hour format)</li>
-            <li>Birth Location (City, Country)</li>
-          </ul>
-          <p className="text-xs text-muted-foreground">Example: 1990-05-15 14:30 London, UK</p>
-          <p className="text-xs text-muted-foreground font-semibold">Please provide them in your next message.</p>
-        </div>,
-      "ai"
-    );
-   };
-
-   // Basic check if a message looks like it contains birth details
-   const parseBirthDetails = (text: string): { date: string, time: string, location: string } | null => {
-    const detailsRegex = /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+([\w\s,]+)/i;
-    const match = text.match(detailsRegex);
-    if (match && match.length === 4) {
-        const date = match[1];
-        const time = match[2];
-        const location = match[3].trim();
-         // Basic validation (can be improved)
-        if (!isNaN(new Date(date).getTime()) && /^\d{2}:\d{2}$/.test(time) && location.length > 3) {
-             return { date, time, location };
-        }
-    }
-    return null;
-   }
-
 
   const handleSubmit = async (event?: FormEvent<HTMLFormElement>, promptText?: string) => {
     event?.preventDefault();
     const userMessage = promptText || input.trim();
 
-    if (!userMessage || isLoading) return;
+    if (!userMessage || isLoading || !birthDetails) {
+        if(!birthDetails && !initialLoading) {
+             toast({ title: "Missing Birth Details", description: "Cannot process request without birth details. Redirecting...", variant: "destructive" });
+             router.push('/get-started');
+        }
+        return; // Don't proceed if loading, no message, or no birth details (after initial check)
+    }
+
 
     addMessage(userMessage, "user");
     setInput(""); // Clear input after sending
     setIsLoading(true);
 
     try {
-        // Check if we need birth details and don't have them
-        if (!birthDetails && userMessage.toLowerCase().includes("birth chart")) {
-            requestBirthDetails();
-            setIsLoading(false);
-            return;
-        }
+         const currentDate = format(new Date(), 'yyyy-MM-dd');
+         const currentTime = format(new Date(), 'HH:mm');
+         // For simplicity, using birth location as current location. A better app would get current location.
+         const currentLocation = birthDetails.location;
 
-        // Check if the user provided birth details
-        const parsedDetails = parseBirthDetails(userMessage);
-        if (parsedDetails) {
-            setBirthDetails(parsedDetails);
-            addMessage("Thank you! I've saved your birth details. Feel free to ask your questions now.", "ai");
-            setIsLoading(false);
-            return;
-        }
+        const response = await getAstrologicalInsights({
+            birthDate: birthDetails.date,
+            birthTime: birthDetails.time,
+            birthLocation: birthDetails.location,
+            currentDate: currentDate,
+            currentTime: currentTime,
+            currentLocation: currentLocation, // Use birth location as current for simplicity
+        });
 
-        // If we have birth details, proceed with the AI call
-        if (birthDetails) {
-             const currentDate = format(new Date(), 'yyyy-MM-dd');
-             const currentTime = format(new Date(), 'HH:mm');
-             // For simplicity, using birth location as current location. A better app would get current location.
-             const currentLocation = birthDetails.location;
-
-            const response = await getAstrologicalInsights({
-                birthDate: birthDetails.date,
-                birthTime: birthDetails.time,
-                birthLocation: birthDetails.location,
-                currentDate: currentDate,
-                currentTime: currentTime,
-                currentLocation: currentLocation, // Use birth location as current for simplicity
-            });
-
-            // Format the AI response for better readability
-             const formattedResponse = (
-                <div className="space-y-4">
-                    {response.personalityInsights && (
-                        <div>
-                            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality Insights:</h3>
-                            <p className="text-sm">{response.personalityInsights}</p>
-                        </div>
-                    )}
-                    {response.lifePathInsights && (
-                         <div>
-                            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Zap size={16}/> Life Path Insights:</h3>
-                            <p className="text-sm">{response.lifePathInsights}</p>
-                        </div>
-                    )}
-                    {response.currentTransitInsights && (
-                         <div>
-                            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Sparkles size={16}/> Current Transit Insights:</h3>
-                            <p className="text-sm">{response.currentTransitInsights}</p>
-                        </div>
-                    )}
-                </div>
-            );
-            addMessage(formattedResponse, "ai");
-
-        } else {
-             // Handle general queries if no birth details needed or provided yet
-             // For now, just ask for birth details if not provided
-             requestBirthDetails();
-        }
+        // Format the AI response for better readability
+         const formattedResponse = (
+            <div className="space-y-4">
+                {response.personalityInsights && (
+                    <div>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality Insights:</h3>
+                        <p className="text-sm">{response.personalityInsights}</p>
+                    </div>
+                )}
+                {response.lifePathInsights && (
+                     <div>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Zap size={16}/> Life Path Insights:</h3>
+                        <p className="text-sm">{response.lifePathInsights}</p>
+                    </div>
+                )}
+                {response.currentTransitInsights && (
+                     <div>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Sparkles size={16}/> Current Transit Insights:</h3>
+                        <p className="text-sm">{response.currentTransitInsights}</p>
+                    </div>
+                )}
+            </div>
+        );
+        addMessage(formattedResponse, "ai");
 
     } catch (error) {
       console.error("Error calling AI:", error);
-      addMessage("Sorry, I encountered an error. Please try again.", "ai");
+      addMessage("Sorry, I encountered an error processing your request. Please try again.", "ai");
       toast({
-        title: "Error",
-        description: "Failed to get astrological insights. Please check your connection and try again.",
+        title: "AI Error",
+        description: "Failed to get astrological insights. Please check the details and try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show loading indicator while checking for details/redirecting
+  if (initialLoading) {
+     return (
+       <div className="flex flex-col flex-grow items-center justify-center min-h-screen bg-background">
+         <Loader2 className="h-12 w-12 animate-spin text-primary" />
+         <p className="mt-4 text-muted-foreground">Loading your cosmic connection...</p>
+       </div>
+     );
+  }
 
   return (
     <div className="flex flex-col flex-grow overflow-hidden p-4">
@@ -212,7 +209,7 @@ export default function ChatInterface() {
               key={message.id}
               className={`flex items-start gap-3 ${
                 message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
+              } animate-in fade-in duration-300`} // Added fade-in animation
             >
               {message.sender === "ai" && (
                 <Avatar className="h-8 w-8 border border-accent">
@@ -243,7 +240,7 @@ export default function ChatInterface() {
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-start gap-3 justify-start">
+            <div className="flex items-start gap-3 justify-start animate-pulse"> {/* Added pulse animation */}
               <Avatar className="h-8 w-8 border border-accent">
                 <AvatarImage src="/astro-ai-avatar.png" alt="AI Avatar" />
                  <AvatarFallback className="bg-primary text-primary-foreground">
@@ -259,11 +256,11 @@ export default function ChatInterface() {
       </ScrollArea>
 
        {/* Prompt Suggestions */}
-        {showSuggestions && messages.length === 0 && (
+        {showSuggestions && messages.length > 1 && !isLoading && ( // Show only after initial message and not loading
             <div className="mb-4 fade-in">
-                <p className="text-sm text-muted-foreground mb-2 text-center">Need inspiration? Try asking:</p>
+                <p className="text-sm text-muted-foreground mb-2 text-center">Or try asking:</p>
                 <div className="flex flex-wrap justify-center gap-2">
-                {promptSuggestions.map((prompt, index) => (
+                {promptSuggestions.slice(0, 3).map((prompt, index) => ( // Limit suggestions shown
                     <Button
                     key={index}
                     variant="outline"
@@ -290,10 +287,10 @@ export default function ChatInterface() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className="flex-grow focus-visible:ring-accent"
-          disabled={isLoading}
+          disabled={isLoading || initialLoading} // Also disable during initial check
           aria-label="Chat input"
         />
-        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="bg-accent text-accent-foreground hover:bg-accent/90">
+        <Button type="submit" size="icon" disabled={isLoading || initialLoading || !input.trim()} className="bg-accent text-accent-foreground hover:bg-accent/90">
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
