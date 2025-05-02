@@ -2,7 +2,7 @@ import { Loader2, Sparkles } from "lucide-react";
 
 export default function Loading() {
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/80 to-background backdrop-blur-sm">
+    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-gradient-to-br from-background/90 via-secondary/70 to-background/90 backdrop-blur-sm"> {/* Increased z-index and slightly adjusted background opacity */}
       <div className="flex flex-col items-center space-y-6 text-center p-8 bg-card/80 rounded-lg shadow-2xl max-w-sm">
         <div className="relative">
            <Loader2 className="h-20 w-20 animate-spin text-primary opacity-50" />

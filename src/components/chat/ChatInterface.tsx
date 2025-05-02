@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2, Sparkles, Zap, BrainCircuit, MessageSquareQuestion } from "lucide-react"; // Added MessageSquareQuestion
+import { Send, Loader2, Sparkles, Zap, BrainCircuit, MessageSquareQuote } from "lucide-react"; // Replaced MessageSquareQuestion with MessageSquareQuote
 import { getAstrologicalInsights } from "@/ai/flows/astrological-insights";
 import { getPromptSuggestions } from "@/ai/flows/prompt-suggestions";
 import { useToast } from "@/hooks/use-toast";
@@ -66,17 +66,17 @@ export default function ChatInterface() {
       const response = await getPromptSuggestions({ topic: "initial insights" });
       if (response.suggestions && response.suggestions.length > 0) {
         // Filter suggestions slightly if needed, or use directly
-        const filteredSuggestions = response.suggestions.filter(s => s.length < 50).slice(0, 3); // Keep suggestions concise
+        const filteredSuggestions = response.suggestions.filter(s => s.length < 60).slice(0, 3); // Keep suggestions concise
         setPromptSuggestions(filteredSuggestions.length > 0 ? filteredSuggestions : [
-            "What are my core personality traits?",
-            "Tell me about my life path.",
-            "What influences are affecting me now?",
+            "What are my core personality traits based on my birth chart?",
+            "Tell me about potential challenges or opportunities on my life path.",
+            "What current astrological influences might be affecting me?",
         ]); // Fallback suggestions
       } else {
           setPromptSuggestions([
-            "What are my core personality traits?",
-            "Tell me about my life path.",
-            "What influences are affecting me now?",
+            "What are my core personality traits based on my birth chart?",
+            "Tell me about potential challenges or opportunities on my life path.",
+            "What current astrological influences might be affecting me?",
         ]); // Fallback suggestions
       }
       setShowSuggestions(true); // Show suggestions after fetching
@@ -84,9 +84,9 @@ export default function ChatInterface() {
       console.error("Error fetching prompt suggestions:", error);
       // Use default suggestions on error
       setPromptSuggestions([
-        "What are my core personality traits?",
-        "Tell me about my life path.",
-        "What influences are affecting me now?",
+         "What are my core personality traits based on my birth chart?",
+         "Tell me about potential challenges or opportunities on my life path.",
+         "What current astrological influences might be affecting me?",
       ]);
       setShowSuggestions(true);
     }
@@ -104,7 +104,7 @@ export default function ChatInterface() {
             setBirthDetails(parsedDetails);
             detailsLoaded = true;
             addMessage(
-              `Welcome back! Using your saved birth details. How can I help you today?`,
+              `Welcome back! Using your saved birth details (${parsedDetails.date} ${parsedDetails.time}, ${parsedDetails.location}). How can I assist you with your astrological query today?`,
               "ai",
               `initial-message-${Date.now()}` // Unique ID for initial message
             );
@@ -132,10 +132,13 @@ export default function ChatInterface() {
     if (scrollAreaRef.current) {
       // Use setTimeout to ensure scroll happens after DOM updates
       setTimeout(() => {
-           scrollAreaRef.current?.scrollTo({
-                top: scrollAreaRef.current.scrollHeight,
-                behavior: "smooth",
-            });
+           const scrollElement = scrollAreaRef.current?.children[0]; // Target the viewport
+            if (scrollElement) {
+                 scrollElement.scrollTo({
+                    top: scrollElement.scrollHeight,
+                    behavior: "smooth",
+                });
+            }
       }, 100); // Increased delay slightly
     }
   }, [messages]);
@@ -180,7 +183,8 @@ export default function ChatInterface() {
     }
 
 
-    addMessage(userMessage, "user");
+    const userMessageId = `user-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    addMessage(userMessage, "user", userMessageId);
     setInput(""); // Clear input after sending
     setIsLoading(true);
     setShowSuggestions(false); // Hide suggestions while loading AI response
@@ -206,7 +210,7 @@ export default function ChatInterface() {
             <div className="space-y-3 text-sm"> {/* Consistent spacing and font size */}
                 {response.directAnswer && ( // Show direct answer first if available
                     <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><MessageSquareQuestion size={16}/> Answer:</h3>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><MessageSquareQuote size={16}/> Answer:</h3> {/* Use MessageSquareQuote */}
                         <p>{response.directAnswer}</p>
                     </div>
                 )}
@@ -230,20 +234,28 @@ export default function ChatInterface() {
                 )}
             </div>
         );
-        addMessage(formattedResponse, "ai");
+        const aiMessageId = `ai-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        addMessage(formattedResponse, "ai", aiMessageId);
 
-    } catch (error) {
-      console.error("Error calling AI:", error);
-      addMessage("Sorry, I had trouble understanding that or generating insights. Could you try rephrasing your question?", "ai");
+    } catch (error: unknown) {
+      // Log the full error object for better debugging
+      console.error("Detailed Error calling AI:", error);
+
+      let errorMessage = "Sorry, I encountered an unexpected issue while consulting the stars. Please try rephrasing or ask again later.";
+      if (error instanceof Error) {
+        errorMessage = `Sorry, I had trouble generating insights (${error.message}). Could you try rephrasing your question?`;
+      }
+        const errorId = `ai-error-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      addMessage(errorMessage, "ai", errorId);
       toast({
         title: "AI Error",
-        description: "Failed to get astrological insights. Please try again later.",
+        description: "Failed to get astrological insights. Please check the console for details and try again later.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
       // Optionally fetch new suggestions after response, or keep them hidden
-       // fetchSuggestions(); // Uncomment to show new suggestions after AI response
+      // fetchSuggestions(); // Uncomment to show new suggestions after AI response
     }
   };
 
@@ -271,7 +283,7 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col flex-grow overflow-hidden p-4">
       {/* Chat Messages Area */}
-      <ScrollArea ref={scrollAreaRef} className="flex-grow mb-4 pr-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-grow mb-4 pr-4 [&>div>div]:!block"> {/* Ensure viewport div is block */}
         <div className="space-y-4">
           {messages.map((message) => (
             <div
