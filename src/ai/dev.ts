@@ -1,1 +1,3 @@
-// Flows will be imported for their side effects in this file.
+import '@/ai/flows/astrological-insights.ts';
+import '@/ai/flows/summarize-astrological-data.ts';
+import '@/ai/flows/prompt-suggestions.ts';
