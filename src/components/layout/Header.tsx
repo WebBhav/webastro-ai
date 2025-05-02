@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Use Sheet for mobile menu
-import { Sparkles, Menu, X } from "lucide-react"; // Add Menu and X icons
+import { Sparkles, Menu, X, Home, Info, Mail, MessageCircle } from "lucide-react"; // Add relevant icons
 
+// Updated Navigation Links
 const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/get-started", label: "Get Started" },
-  { href: "/chat", label: "Chat" },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/about", label: "About", icon: Info },
+  { href: "/contact", label: "Contact Us", icon: Mail },
+  { href: "/get-started", label: "Chat", icon: MessageCircle }, // Link Chat to the get-started page
 ];
 
 export function Header() {
@@ -32,9 +34,10 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1" // Added flex and gap
               onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu if open
             >
+               <link.icon className="h-4 w-4" /> {/* Display icon */}
               {link.label}
             </Link>
           ))}
@@ -69,8 +72,9 @@ export function Header() {
                   <SheetClose key={link.href} asChild>
                     <Link
                       href={link.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+                      className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground" // Added flex and gap
                     >
+                      <link.icon className="h-5 w-5" /> {/* Display icon */}
                       {link.label}
                     </Link>
                   </SheetClose>
