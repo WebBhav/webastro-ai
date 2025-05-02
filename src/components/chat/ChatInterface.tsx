@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2, Sparkles, Zap, BrainCircuit } from "lucide-react";
+import { Send, Loader2, Sparkles, Zap, BrainCircuit, MessageSquareQuestion } from "lucide-react"; // Added MessageSquareQuestion
 import { getAstrologicalInsights } from "@/ai/flows/astrological-insights";
 import { getPromptSuggestions } from "@/ai/flows/prompt-suggestions";
 import { useToast } from "@/hooks/use-toast";
@@ -46,10 +46,10 @@ export default function ChatInterface() {
    const addMessage = useCallback((text: string | React.ReactNode, sender: "user" | "ai", explicitId?: string) => {
     const id = explicitId || `${sender}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     setMessages((prev) => {
-      // Avoid adding duplicate initial messages if component re-renders
-      if (sender === 'ai' && prev.some(msg => msg.id.startsWith('initial-message-'))) {
-        const existingInitial = prev.find(msg => msg.id.startsWith('initial-message-'));
-        if (existingInitial && existingInitial.text === text) return prev;
+      // Prevent adding duplicate initial welcome messages during strict mode re-renders
+      if (sender === 'ai' && text && typeof text === 'string' && text.startsWith('Welcome back!')) {
+        const existingWelcome = prev.find(msg => typeof msg.text === 'string' && msg.text?.startsWith('Welcome back!'));
+        if (existingWelcome) return prev; // Don't add another welcome message
       }
       return [...prev, { id, text, sender }];
     });
@@ -62,18 +62,31 @@ export default function ChatInterface() {
   // Function to fetch prompt suggestions
   const fetchSuggestions = async () => {
     try {
-      const response = await getPromptSuggestions({});
+      // Add a topic to get more relevant suggestions
+      const response = await getPromptSuggestions({ topic: "initial insights" });
       if (response.suggestions && response.suggestions.length > 0) {
-        setPromptSuggestions(response.suggestions);
-        setShowSuggestions(true); // Show suggestions after fetching
+        // Filter suggestions slightly if needed, or use directly
+        const filteredSuggestions = response.suggestions.filter(s => s.length < 50).slice(0, 3); // Keep suggestions concise
+        setPromptSuggestions(filteredSuggestions.length > 0 ? filteredSuggestions : [
+            "What are my core personality traits?",
+            "Tell me about my life path.",
+            "What influences are affecting me now?",
+        ]); // Fallback suggestions
+      } else {
+          setPromptSuggestions([
+            "What are my core personality traits?",
+            "Tell me about my life path.",
+            "What influences are affecting me now?",
+        ]); // Fallback suggestions
       }
+      setShowSuggestions(true); // Show suggestions after fetching
     } catch (error) {
       console.error("Error fetching prompt suggestions:", error);
-      // Optionally show default suggestions or an error message
+      // Use default suggestions on error
       setPromptSuggestions([
-        "Tell me about my personality.",
-        "What's my life path?",
-        "What's happening now?",
+        "What are my core personality traits?",
+        "Tell me about my life path.",
+        "What influences are affecting me now?",
       ]);
       setShowSuggestions(true);
     }
@@ -90,12 +103,12 @@ export default function ChatInterface() {
           if (parsedDetails.date && parsedDetails.time && parsedDetails.location) {
             setBirthDetails(parsedDetails);
             detailsLoaded = true;
-            fetchSuggestions(); // Fetch suggestions only if details are loaded
             addMessage(
-              `Welcome back! Using your saved birth details: ${parsedDetails.date}, ${parsedDetails.time}, ${parsedDetails.location}. How can I help you today?`,
+              `Welcome back! Using your saved birth details. How can I help you today?`,
               "ai",
-              `initial-message-${Date.now()}`
+              `initial-message-${Date.now()}` // Unique ID for initial message
             );
+            fetchSuggestions(); // Fetch suggestions only if details are loaded
           }
       }
     } catch (e) {
@@ -110,7 +123,8 @@ export default function ChatInterface() {
     } else {
        setInitialLoading(false); // Mark initial check as complete only if details loaded successfully
     }
-  }, [router, toast, addMessage]); // Add addMessage here
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, toast]); // Removed addMessage, fetchSuggestions to run only once on mount
 
 
   // Scroll to bottom when messages update
@@ -139,7 +153,15 @@ export default function ChatInterface() {
     const userMessage = promptText || input.trim();
 
      // Re-check birth details *before* making the call
-    const currentDetails = birthDetails ?? JSON.parse(localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY) || 'null');
+    const currentDetailsString = localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY);
+    let currentDetails: BirthDetails | null = null;
+     try {
+        if (currentDetailsString) {
+            currentDetails = JSON.parse(currentDetailsString);
+        }
+     } catch (e) {
+        console.error("Error parsing birth details during submit:", e);
+     }
 
 
     if (!userMessage || isLoading || !currentDetails) {
@@ -152,8 +174,8 @@ export default function ChatInterface() {
         return; // Don't proceed if loading, no message, or no birth details
     }
 
-    // Ensure birthDetails state is updated if it wasn't initially
-    if (!birthDetails && currentDetails) {
+    // Ensure birthDetails state is updated if it wasn't initially (e.g., due to fast navigation)
+    if (!birthDetails) {
         setBirthDetails(currentDetails);
     }
 
@@ -161,6 +183,7 @@ export default function ChatInterface() {
     addMessage(userMessage, "user");
     setInput(""); // Clear input after sending
     setIsLoading(true);
+    setShowSuggestions(false); // Hide suggestions while loading AI response
 
     try {
          const currentDate = format(new Date(), 'yyyy-MM-dd');
@@ -175,12 +198,19 @@ export default function ChatInterface() {
             currentDate: currentDate,
             currentTime: currentTime,
             currentLocation: currentLocation, // Use birth location as current for simplicity
+            userQuery: userMessage, // Pass the user's message
         });
 
-        // Format the AI response for better readability (simplified)
+        // Format the AI response for better readability
          const formattedResponse = (
-            <div className="space-y-3 text-sm"> {/* Reduced spacing and font size */}
-                {response.personalityInsights && (
+            <div className="space-y-3 text-sm"> {/* Consistent spacing and font size */}
+                {response.directAnswer && ( // Show direct answer first if available
+                    <div>
+                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><MessageSquareQuestion size={16}/> Answer:</h3>
+                        <p>{response.directAnswer}</p>
+                    </div>
+                )}
+                 {response.personalityInsights && (
                     <div>
                         <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality:</h3>
                         <p>{response.personalityInsights}</p>
@@ -204,24 +234,37 @@ export default function ChatInterface() {
 
     } catch (error) {
       console.error("Error calling AI:", error);
-      addMessage("Sorry, I had trouble understanding that. Could you try asking in a different way?", "ai");
+      addMessage("Sorry, I had trouble understanding that or generating insights. Could you try rephrasing your question?", "ai");
       toast({
         title: "AI Error",
-        description: "Failed to get astrological insights. Please try again.",
+        description: "Failed to get astrological insights. Please try again later.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+      // Optionally fetch new suggestions after response, or keep them hidden
+       // fetchSuggestions(); // Uncomment to show new suggestions after AI response
     }
   };
 
   // Show loading indicator while checking for details/redirecting
   if (initialLoading) {
      return (
-       <div className="flex flex-col flex-grow items-center justify-center min-h-screen bg-background">
-         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-         <p className="mt-4 text-muted-foreground">Loading your cosmic connection...</p>
-       </div>
+        // Use the global Loading component styling
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/80 to-background backdrop-blur-sm">
+            <div className="flex flex-col items-center space-y-6 text-center p-8 bg-card/80 rounded-lg shadow-2xl max-w-sm">
+                <div className="relative">
+                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-50" />
+                <Sparkles className="absolute inset-0 m-auto h-12 w-12 text-accent animate-pulse" />
+                </div>
+                <p className="text-2xl font-semibold text-primary animate-pulse">
+                Checking Your Details...
+                </p>
+                <p className="text-md text-muted-foreground">
+                Please wait while we load your astrological connection.
+                </p>
+            </div>
+        </div>
      );
   }
 
@@ -238,8 +281,9 @@ export default function ChatInterface() {
               } animate-in fade-in duration-300`}
             >
               {message.sender === "ai" && (
-                <Avatar className="h-8 w-8 border border-accent">
-                  <AvatarImage src="/astro-ai-avatar.png" alt="AI Avatar" data-ai-hint="robot nebula avatar" />
+                <Avatar className="h-8 w-8 border border-accent shrink-0"> {/* Added shrink-0 */}
+                  {/* Placeholder image path, replace if you have one */}
+                  <AvatarImage src="/placeholder-avatar.png" alt="AI Avatar" data-ai-hint="robot nebula avatar" />
                    <AvatarFallback className="bg-primary text-primary-foreground">
                     <Sparkles size={16} />
                   </AvatarFallback>
@@ -249,29 +293,31 @@ export default function ChatInterface() {
                 className={`rounded-lg p-3 max-w-xs md:max-w-md lg:max-w-lg shadow-md break-words ${
                   message.sender === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
+                    : "bg-card text-card-foreground border" // Use card style for AI
                 }`}
               >
                  {/* Render string or React node */}
                  {message.text}
               </div>
               {message.sender === "user" && (
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 shrink-0"> {/* Added shrink-0 */}
                    <AvatarFallback className="bg-accent text-accent-foreground">U</AvatarFallback>
                 </Avatar>
               )}
             </div>
           ))}
           {isLoading && (
-            <div key={`loading-${Date.now()}`} className="flex items-start gap-3 justify-start animate-pulse">
-              <Avatar className="h-8 w-8 border border-accent">
-                <AvatarImage src="/astro-ai-avatar.png" alt="AI Avatar" />
+             <div key={`loading-indicator`} className="flex items-start gap-3 justify-start animate-pulse">
+              <Avatar className="h-8 w-8 border border-accent shrink-0">
+                 <AvatarImage src="/placeholder-avatar.png" alt="AI Avatar" />
                  <AvatarFallback className="bg-primary text-primary-foreground">
                    <Sparkles size={16} />
                  </AvatarFallback>
               </Avatar>
-              <div className="rounded-lg p-3 bg-secondary text-secondary-foreground shadow-md">
+              <div className="rounded-lg p-3 bg-secondary text-secondary-foreground shadow-md flex items-center space-x-2">
                 <Loader2 className="h-5 w-5 animate-spin text-accent" />
+                {/* Optional typing indicator text */}
+                {/* <span className="text-sm">Consulting the stars...</span> */}
               </div>
             </div>
           )}
@@ -281,15 +327,15 @@ export default function ChatInterface() {
        {/* Prompt Suggestions */}
         {showSuggestions && messages.length > 0 && !isLoading && ( // Conditionally show suggestions
             <div className="mb-4 fade-in">
-                <p className="text-sm text-muted-foreground mb-2 text-center">Try asking:</p>
+                <p className="text-sm text-muted-foreground mb-2 text-center">Need ideas? Try asking:</p>
                 <div className="flex flex-wrap justify-center gap-2">
-                {promptSuggestions.slice(0, 3).map((prompt, index) => (
+                {promptSuggestions.map((prompt, index) => (
                     <Button
                     key={index}
                     variant="outline"
                     size="sm"
                     onClick={() => handlePromptClick(prompt)}
-                    className="bg-background hover:bg-accent/10 border-accent text-accent hover:text-accent transition-colors duration-200"
+                    className="bg-background hover:bg-accent/10 border-accent/50 text-accent hover:text-accent transition-colors duration-200 shadow-sm hover:shadow-md text-xs px-2 py-1 h-auto" // Smaller suggestions
                     >
                     {prompt}
                     </Button>
@@ -306,14 +352,14 @@ export default function ChatInterface() {
       >
         <Input
           type="text"
-          placeholder="Ask about your stars..."
+          placeholder="Ask the cosmos..." // Changed placeholder
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className="flex-grow focus-visible:ring-accent"
           disabled={isLoading || initialLoading} // Also disable during initial check
           aria-label="Chat input"
         />
-        <Button type="submit" size="icon" disabled={isLoading || initialLoading || !input.trim()} className="bg-accent text-accent-foreground hover:bg-accent/90">
+        <Button type="submit" size="icon" disabled={isLoading || initialLoading || !input.trim()} className="bg-accent text-accent-foreground hover:bg-accent/90 shrink-0"> {/* Added shrink-0 */}
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
