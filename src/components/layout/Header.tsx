@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Use Sheet for mobile menu
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet"; // Use Sheet for mobile menu, import SheetTitle
 import { Sparkles, Menu, X, Home, Info, Mail, MessageCircle } from "lucide-react"; // Add relevant icons
 
 // Updated Navigation Links
@@ -53,6 +53,8 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full max-w-xs bg-background p-6">
+               {/* Add a visually hidden title for accessibility */}
+               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               {/* Mobile Menu Header */}
               <div className="mb-6 flex items-center justify-between">
                  <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
