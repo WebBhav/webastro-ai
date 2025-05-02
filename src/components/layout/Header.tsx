@@ -1,11 +1,13 @@
 
-'use client'; // Needed for useState and interaction
+'use client'; // Needed for useState, usePathname and interaction
 
 import Link from "next/link";
 import { useState } from 'react';
+import { usePathname } from 'next/navigation'; // Import usePathname
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet"; // Use Sheet for mobile menu, import SheetTitle
 import { Sparkles, Menu, X } from "lucide-react"; // Remove unused icons (Home, Info, Mail, MessageCircle)
+import { cn } from "@/lib/utils"; // Import cn for conditional classes
 
 // Updated Navigation Links - Removed icons
 const NAV_LINKS = [
@@ -16,10 +18,12 @@ const NAV_LINKS = [
 ];
 
 // Separate Chat link details
+// Updated href to point to /get-started as per user request
 const CHAT_LINK = { href: "/get-started", label: "Chat" };
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname(); // Get the current pathname
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,22 +39,33 @@ export function Header() {
         {/* Desktop Navigation */}
         <div className="flex flex-1 items-center justify-end"> {/* Wrap nav and button */}
             <nav className="hidden items-center gap-6 text-sm md:flex mr-6"> {/* Added margin-right */}
-            {NAV_LINKS.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-foreground/80 text-foreground/60" // Removed flex and icon
-                onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu if open
-                >
-                {link.label}
-                </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+                 const isActive = pathname === link.href;
+                 return (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                        "transition-colors hover:text-foreground/80",
+                        isActive ? "text-foreground font-semibold" : "text-foreground/60" // Apply bold and different color if active
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu if open
+                    >
+                    {link.label}
+                    </Link>
+                );
+            })}
             </nav>
 
             {/* Desktop Chat Button */}
             <div className="hidden md:flex">
+                {/* Check if the chat-related routes are active */}
                  <Link href={CHAT_LINK.href} passHref>
-                   <Button variant="default" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90"> {/* Adjusted button style */}
+                   <Button
+                     variant={pathname.startsWith('/get-started') || pathname.startsWith('/chat') ? "default" : "default"} // Keep default variant, could add active style if needed
+                     size="sm"
+                     className="bg-accent text-accent-foreground hover:bg-accent/90" // Adjusted button style
+                    >
                      {CHAT_LINK.label}
                    </Button>
                  </Link>
@@ -84,18 +99,23 @@ export function Header() {
                     </div>
                     {/* Mobile Menu Links */}
                     <nav className="flex flex-col gap-4">
-                        {[...NAV_LINKS, CHAT_LINK].map((link) => ( // Include Chat link in mobile menu
-                            <SheetClose key={link.href} asChild>
-                                <Link
-                                href={link.href}
-                                // Style chat link differently in mobile if desired, or keep consistent
-                                className={`flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground`} // Base style for all mobile links
-                                >
-                                {/* Removed icon rendering */}
-                                {link.label}
-                                </Link>
-                            </SheetClose>
-                        ))}
+                        {[...NAV_LINKS, CHAT_LINK].map((link) => { // Include Chat link in mobile menu
+                             const isActive = pathname === link.href || (link.href === CHAT_LINK.href && (pathname.startsWith('/get-started') || pathname.startsWith('/chat')));
+                             return (
+                                <SheetClose key={link.href} asChild>
+                                    <Link
+                                        href={link.href}
+                                        className={cn(
+                                            `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground`, // Base style for all mobile links
+                                            isActive && "bg-accent/10 font-semibold text-accent" // Active style for mobile
+                                        )}
+                                    >
+                                    {/* Removed icon rendering */}
+                                    {link.label}
+                                    </Link>
+                                </SheetClose>
+                            );
+                        })}
                     </nav>
                     </SheetContent>
                 </Sheet>
