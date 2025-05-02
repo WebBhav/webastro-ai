@@ -21,7 +21,7 @@ export default function Home() {
             </p>
             <Link href="/get-started" passHref className="slide-up" style={{ animationDelay: '0.3s' }}>
               <Button size="lg" className="mt-4 shadow-lg transform transition hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
-                <Rocket className="mr-2 h-5 w-5" /> Get Started Now
+                <Rocket className="mr-2 h-5 w-5" /> Try it now
               </Button>
             </Link>
           </div>

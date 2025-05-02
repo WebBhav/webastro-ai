@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation'; // Import usePathname
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet"; // Use Sheet for mobile menu, import SheetTitle
-import { Sparkles, Menu, X } from "lucide-react"; // Remove unused icons (Home, Info, Mail, MessageCircle)
+import { Sparkles, Menu, X, MessageSquare } from "lucide-react"; // Remove unused icons (Home, Info, Mail), Add MessageSquare
 import { cn } from "@/lib/utils"; // Import cn for conditional classes
 
 // Updated Navigation Links - Removed icons
@@ -66,6 +66,7 @@ export function Header() {
                      size="sm"
                      className="bg-accent text-accent-foreground hover:bg-accent/90" // Adjusted button style
                     >
+                     <MessageSquare className="mr-2 h-4 w-4" /> {/* Added Icon */}
                      {CHAT_LINK.label}
                    </Button>
                  </Link>
@@ -110,7 +111,8 @@ export function Header() {
                                             isActive && "bg-accent/10 font-semibold text-accent" // Active style for mobile
                                         )}
                                     >
-                                    {/* Removed icon rendering */}
+                                    {/* Render icon for Chat link in mobile menu */}
+                                    {link.href === CHAT_LINK.href && <MessageSquare className="h-4 w-4" />}
                                     {link.label}
                                     </Link>
                                 </SheetClose>
