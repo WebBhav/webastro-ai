@@ -34,15 +34,17 @@ const GetAstrologicalInsightsInputSchema = z.object({
       'The current time. Expected format: HH:MM.'
     ),
   currentLocation: z.string().describe('The current location.'),
-  userQuery: z.string().optional().describe('The specific question the user asked.'), // Added optional user query
+  userQuery: z.string().optional().describe('The specific question the user asked.'),
+  language: z.string().optional().default('English').describe('The language for the response (e.g., "English", "Spanish"). Defaults to English.'), // Added language field
 });
 export type GetAstrologicalInsightsInput = z.infer<typeof GetAstrologicalInsightsInputSchema>;
 
+// Output schema remains the same, but the content will be simpler
 const GetAstrologicalInsightsOutputSchema = z.object({
-  personalityInsights: z.string().describe('Short, simple analysis of the user personality (1-2 sentences).'),
-  lifePathInsights: z.string().describe('Simple guidance about the user life path (1-2 sentences).'),
-  currentTransitInsights: z.string().describe('Simple insights based on current planetary positions (1-2 sentences).'),
-  directAnswer: z.string().optional().describe('A direct, concise answer to the specific user query, if provided (1-2 sentences).'), // Added optional direct answer
+  personalityInsights: z.string().describe('Short, simple, easy-to-understand analysis of the user personality (1-2 sentences, beginner-friendly).'),
+  lifePathInsights: z.string().describe('Simple, clear guidance about the user life path (1-2 sentences, beginner-friendly).'),
+  currentTransitInsights: z.string().describe('Simple, easy-to-grasp insights based on current planetary positions (1-2 sentences, beginner-friendly).'),
+  directAnswer: z.string().optional().describe('A direct, concise, simple answer to the specific user query, if provided (1-2 sentences, beginner-friendly).'),
 });
 export type GetAstrologicalInsightsOutput = z.infer<typeof GetAstrologicalInsightsOutputSchema>;
 
@@ -58,7 +60,12 @@ const prompt = ai.definePrompt({
   output: {
     schema: GetAstrologicalInsightsOutputSchema, // Use the updated output schema
   },
-  prompt: `You are an AI Astrologer explaining insights to someone new to astrology. Use SIMPLE, CLEAR language. Avoid jargon. Keep each section CONCISE (1-2 sentences).
+  // Updated prompt instructions for simplicity, clarity, beginner-friendliness, and language
+  prompt: `You are an AI Astrologer explaining insights to someone COMPLETELY NEW to astrology.
+Your goal is to be extremely SIMPLE, CLEAR, and ENCOURAGING.
+ABSOLUTELY NO complex astrological jargon (like aspects, houses, specific planet names unless essential and simply explained).
+Keep each insight VERY SHORT and EASY TO UNDERSTAND (1-2 simple sentences).
+Generate the response in the following language: {{{language}}}.
 
 DO NOT ask for birth details; use the ones provided below.
 
@@ -74,16 +81,16 @@ Current Location: {{{currentLocation}}}
 
 User's Question (if any): {{{userQuery}}}
 
-Based ONLY on the provided birth details and current context, generate the following insights:
+Based ONLY on the provided birth details and current context, generate the following insights in a beginner-friendly way in {{{language}}}:
 
-1.  **Personality:** Briefly analyze the user's core personality.
-2.  **Life Path:** Offer simple guidance on their life path, challenges, or opportunities.
-3.  **Current Influences:** Give simple insights based on current planetary transits affecting them now.
+1.  **Personality:** Briefly describe a key part of the user's personality in simple terms. (e.g., "You likely have a very creative side." or "You might be someone who enjoys helping others.")
+2.  **Life Path:** Offer simple guidance about their general direction or potential. (e.g., "Learning new things could be really rewarding for you." or "Building strong friendships might be important on your journey.")
+3.  **Current Influences:** Give a very simple hint about the current energy affecting them. (e.g., "It might be a good time to focus on your goals." or "You might feel a bit more thoughtful lately.")
 {{#if userQuery}}
-4.  **Direct Answer:** Directly answer the user's specific question: "{{{userQuery}}}" using astrological principles, keeping it simple and concise.
+4.  **Direct Answer:** Directly answer the user's specific question: "{{{userQuery}}}" using extremely simple terms. Avoid complex astrology. Keep it concise and clear.
 {{/if}}
 
-Ensure the output matches the required JSON schema format (personalityInsights, lifePathInsights, currentTransitInsights, directAnswer?). Keep each insight to 1-2 simple sentences.`,
+Ensure the output matches the required JSON schema format (personalityInsights, lifePathInsights, currentTransitInsights, directAnswer?). Remember: SIMPLE, CLEAR, NO JARGON, 1-2 sentences per section, in {{{language}}}.`,
 });
 
 
@@ -98,7 +105,7 @@ const astrologicalInsightsFlow = ai.defineFlow<
   },
   async input => {
     const {output} = await prompt(input);
-    // The prompt now explicitly asks for the desired format, so direct return should be fine.
+    // The prompt now explicitly asks for the desired format and language.
     return output!;
   }
 );

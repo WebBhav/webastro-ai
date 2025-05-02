@@ -27,6 +27,7 @@ interface BirthDetails {
   date: string;
   time: string;
   location: string;
+  language: string; // Added language
 }
 
 export default function ChatInterface() {
@@ -47,8 +48,9 @@ export default function ChatInterface() {
     const id = explicitId || `${sender}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     setMessages((prev) => {
       // Prevent adding duplicate initial welcome messages during strict mode re-renders
-      if (sender === 'ai' && text && typeof text === 'string' && text.startsWith('Welcome back!')) {
-        const existingWelcome = prev.find(msg => typeof msg.text === 'string' && msg.text?.startsWith('Welcome back!'));
+      const welcomeMessageIdentifier = 'Welcome! Using your saved birth details';
+      if (sender === 'ai' && text && typeof text === 'string' && text.startsWith(welcomeMessageIdentifier)) {
+        const existingWelcome = prev.find(msg => typeof msg.text === 'string' && msg.text?.startsWith(welcomeMessageIdentifier));
         if (existingWelcome) return prev; // Don't add another welcome message
       }
       return [...prev, { id, text, sender }];
@@ -56,7 +58,7 @@ export default function ChatInterface() {
     if (sender === 'user') {
       setShowSuggestions(false); // Hide suggestions after user sends a message
     }
-  }, []); // Empty dependency array as it doesn't depend on component state directly
+  }, []);
 
 
   // Function to fetch prompt suggestions
@@ -68,15 +70,15 @@ export default function ChatInterface() {
         // Filter suggestions slightly if needed, or use directly
         const filteredSuggestions = response.suggestions.filter(s => s.length < 60).slice(0, 3); // Keep suggestions concise
         setPromptSuggestions(filteredSuggestions.length > 0 ? filteredSuggestions : [
-            "What are my core personality traits based on my birth chart?",
-            "Tell me about potential challenges or opportunities on my life path.",
-            "What current astrological influences might be affecting me?",
+            "What are my core personality traits?", // Simplified prompt suggestions
+            "Tell me about my life path.",
+            "What's the energy like for me now?",
         ]); // Fallback suggestions
       } else {
           setPromptSuggestions([
-            "What are my core personality traits based on my birth chart?",
-            "Tell me about potential challenges or opportunities on my life path.",
-            "What current astrological influences might be affecting me?",
+             "What are my core personality traits?",
+            "Tell me about my life path.",
+            "What's the energy like for me now?",
         ]); // Fallback suggestions
       }
       setShowSuggestions(true); // Show suggestions after fetching
@@ -84,9 +86,9 @@ export default function ChatInterface() {
       console.error("Error fetching prompt suggestions:", error);
       // Use default suggestions on error
       setPromptSuggestions([
-         "What are my core personality traits based on my birth chart?",
-         "Tell me about potential challenges or opportunities on my life path.",
-         "What current astrological influences might be affecting me?",
+          "What are my core personality traits?",
+          "Tell me about my life path.",
+          "What's the energy like for me now?",
       ]);
       setShowSuggestions(true);
     }
@@ -99,20 +101,27 @@ export default function ChatInterface() {
       const storedDetails = localStorage.getItem(BIRTH_DETAILS_STORAGE_KEY);
       if (storedDetails) {
           const parsedDetails: BirthDetails = JSON.parse(storedDetails);
-          // Basic validation of loaded data
-          if (parsedDetails.date && parsedDetails.time && parsedDetails.location) {
+          // Basic validation of loaded data (including language)
+          if (parsedDetails.date && parsedDetails.time && parsedDetails.location && parsedDetails.language) {
             setBirthDetails(parsedDetails);
             detailsLoaded = true;
+            // Updated welcome message
             addMessage(
-              `Welcome back! Using your saved birth details (${parsedDetails.date} ${parsedDetails.time}, ${parsedDetails.location}). How can I assist you with your astrological query today?`,
+              `Welcome! Using your saved birth details (${parsedDetails.date} ${parsedDetails.time}, ${parsedDetails.location}). Ask me anything about your chart!`,
               "ai",
               `initial-message-${Date.now()}` // Unique ID for initial message
             );
             fetchSuggestions(); // Fetch suggestions only if details are loaded
+          } else {
+            console.warn("Stored birth details are incomplete or invalid:", parsedDetails);
+             // Clear potentially corrupted data
+             localStorage.removeItem(BIRTH_DETAILS_STORAGE_KEY);
           }
       }
     } catch (e) {
        console.error("Failed to parse birth details from storage:", e);
+       // Clear potentially corrupted data
+       localStorage.removeItem(BIRTH_DETAILS_STORAGE_KEY);
        // Don't toast immediately, let the redirect handle it
     }
 
@@ -161,9 +170,16 @@ export default function ChatInterface() {
      try {
         if (currentDetailsString) {
             currentDetails = JSON.parse(currentDetailsString);
+            // Validate again
+            if (!currentDetails?.date || !currentDetails?.time || !currentDetails?.location || !currentDetails?.language) {
+                console.warn("Invalid details found during submit:", currentDetails);
+                currentDetails = null; // Invalidate if incomplete
+                localStorage.removeItem(BIRTH_DETAILS_STORAGE_KEY);
+            }
         }
      } catch (e) {
         console.error("Error parsing birth details during submit:", e);
+        localStorage.removeItem(BIRTH_DETAILS_STORAGE_KEY); // Clear potentially corrupted data
      }
 
 
@@ -203,6 +219,7 @@ export default function ChatInterface() {
             currentTime: currentTime,
             currentLocation: currentLocation, // Use birth location as current for simplicity
             userQuery: userMessage, // Pass the user's message
+            language: currentDetails.language, // Pass the language
         });
 
         // Format the AI response for better readability
@@ -243,13 +260,14 @@ export default function ChatInterface() {
 
       let errorMessage = "Sorry, I encountered an unexpected issue while consulting the stars. Please try rephrasing or ask again later.";
       if (error instanceof Error) {
-        errorMessage = `Sorry, I had trouble generating insights (${error.message}). Could you try rephrasing your question?`;
+        // Provide a simpler error message to the user
+        errorMessage = `Sorry, I had trouble understanding that. Could you try asking in a different way?`;
       }
         const errorId = `ai-error-${Date.now()}-${Math.random().toString(36).substring(7)}`;
       addMessage(errorMessage, "ai", errorId);
       toast({
         title: "AI Error",
-        description: "Failed to get astrological insights. Please check the console for details and try again later.",
+        description: "Couldn't get insights right now. Please try again shortly.", // Simplified toast
         variant: "destructive",
       });
     } finally {

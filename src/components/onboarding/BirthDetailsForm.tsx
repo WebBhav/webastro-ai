@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Languages, Loader2 } from 'lucide-react'; // Added Languages icon
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -26,12 +26,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; // Import Select components
 import { useToast } from '@/hooks/use-toast';
 
 // Define the localStorage key
 const BIRTH_DETAILS_STORAGE_KEY = 'webastro_birth_details';
 
-// Validation schema
+// Supported Languages (can be expanded)
+const LANGUAGES = [
+  { value: 'English', label: 'English' },
+  { value: 'Spanish', label: 'Español' },
+  { value: 'French', label: 'Français' },
+  { value: 'German', label: 'Deutsch' },
+  // Add more languages as needed
+];
+
+// Validation schema including language
 const formSchema = z.object({
   birthDate: z.date({
     required_error: 'A birth date is required.',
@@ -42,6 +58,9 @@ const formSchema = z.object({
   birthLocation: z.string().min(3, {
     message: 'Birth location must be at least 3 characters.',
   }),
+  language: z.string({
+    required_error: 'Please select a language.',
+  }).min(1, 'Please select a language.'), // Ensure a language is selected
 });
 
 export type BirthDetailsFormValues = z.infer<typeof formSchema>;
@@ -50,6 +69,7 @@ export function BirthDetailsForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [selectedLanguageLabel, setSelectedLanguageLabel] = React.useState("Select Language"); // State for display label
 
   const form = useForm<BirthDetailsFormValues>({
     resolver: zodResolver(formSchema),
@@ -57,6 +77,7 @@ export function BirthDetailsForm() {
       birthDate: undefined, // Explicitly set to undefined initially
       birthTime: '',
       birthLocation: '',
+      language: '', // Default language value
     },
   });
 
@@ -68,6 +89,7 @@ export function BirthDetailsForm() {
         date: format(data.birthDate, 'yyyy-MM-dd'),
         time: data.birthTime,
         location: data.birthLocation,
+        language: data.language, // Save selected language
       };
 
       // Store in localStorage *synchronously*
@@ -75,7 +97,7 @@ export function BirthDetailsForm() {
 
       toast({
         title: "Details Saved!",
-        description: "We've securely stored your birth details.",
+        description: "We've securely stored your birth details and language preference.", // Updated toast message
       });
 
        // Use requestAnimationFrame to ensure localStorage write completes before navigation
@@ -96,10 +118,19 @@ export function BirthDetailsForm() {
     }
   };
 
+  // Update language label when value changes
+  const handleLanguageChange = (value: string) => {
+    const selectedLang = LANGUAGES.find(lang => lang.value === value);
+    setSelectedLanguageLabel(selectedLang ? selectedLang.label : "Select Language");
+    form.setValue('language', value); // Update form state
+  };
+
+
   return (
     <Form {...form}>
       {/* Use the handleFormSubmit function in the onSubmit handler */}
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+        {/* Birth Date */}
         <FormField
           control={form.control}
           name="birthDate"
@@ -146,6 +177,7 @@ export function BirthDetailsForm() {
             </FormItem>
           )}
         />
+        {/* Birth Time */}
         <FormField
           control={form.control}
           name="birthTime"
@@ -168,6 +200,7 @@ export function BirthDetailsForm() {
             </FormItem>
           )}
         />
+        {/* Birth Location */}
         <FormField
           control={form.control}
           name="birthLocation"
@@ -188,6 +221,43 @@ export function BirthDetailsForm() {
             </FormItem>
           )}
         />
+        {/* Language Selection */}
+         <FormField
+          control={form.control}
+          name="language"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Language</FormLabel>
+               <Select
+                  onValueChange={(value) => {
+                    field.onChange(value); // Update react-hook-form state
+                    handleLanguageChange(value); // Update display label
+                  }}
+                  defaultValue={field.value}
+                  disabled={isLoading}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                       <Languages className="mr-2 h-4 w-4 text-muted-foreground" /> {/* Icon */}
+                       <SelectValue placeholder="Select Language" >{selectedLanguageLabel}</SelectValue> {/* Use state for display */}
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              <FormDescription>
+                Select the language for your astrological insights.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
