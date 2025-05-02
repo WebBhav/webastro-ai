@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FormEvent } from "react";
@@ -73,7 +74,8 @@ export default function ChatInterface() {
           fetchSuggestions(); // Fetch suggestions only if details are loaded
           addMessage(
             `Welcome back! Using your saved birth details: ${parsedDetails.date}, ${parsedDetails.time}, ${parsedDetails.location}. Ask me anything!`,
-            "ai"
+            "ai",
+            `initial-message-${Date.now()}` // Provide a unique initial ID
           );
         } else {
           // Invalid data found, redirect
@@ -97,16 +99,22 @@ export default function ChatInterface() {
   // Scroll to bottom when messages update
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+      // Use setTimeout to ensure scroll happens after DOM updates
+      setTimeout(() => {
+           scrollAreaRef.current?.scrollTo({
+                top: scrollAreaRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+      }, 0);
     }
   }, [messages]);
 
   // Function to add a new message to the state
-  const addMessage = (text: string | React.ReactNode, sender: "user" | "ai") => {
-    setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender }]);
+  const addMessage = (text: string | React.ReactNode, sender: "user" | "ai", explicitId?: string) => {
+    // Use explicit ID if provided, otherwise generate one.
+    // Add a random suffix to reduce collision chance with Date.now()
+    const id = explicitId || `${Date.now().toString()}-${Math.random().toString(36).substring(7)}`;
+    setMessages((prev) => [...prev, { id: id, text, sender }]);
      if (sender === 'user') {
       setShowSuggestions(false); // Hide suggestions after user sends a message
     }
@@ -240,7 +248,8 @@ export default function ChatInterface() {
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-start gap-3 justify-start animate-pulse"> {/* Added pulse animation */}
+             // Add a unique key to the loading indicator to avoid collision
+            <div key="loading-indicator" className="flex items-start gap-3 justify-start animate-pulse"> {/* Added pulse animation */}
               <Avatar className="h-8 w-8 border border-accent">
                 <AvatarImage src="/astro-ai-avatar.png" alt="AI Avatar" />
                  <AvatarFallback className="bg-primary text-primary-foreground">
@@ -302,3 +311,4 @@ export default function ChatInterface() {
     </div>
   );
 }
+
