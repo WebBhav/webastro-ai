@@ -40,7 +40,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-base text-muted-foreground leading-relaxed">
               <p>
-                We leverage the power of advanced AI, specifically Google's Gemini model, trained on a vast corpus of astrological knowledge. By inputting your precise birth details (date, time, and location), our AI generates personalized interpretations of your unique natal chart.
+                We leverage the power of advanced AI, trained on a vast corpus of astrological knowledge. By inputting your precise birth details (date, time, and location), our AI generates personalized interpretations of your unique natal chart.
               </p>
               <p>
                 Unlike generic horoscopes, WebAstro AI provides nuanced insights tailored specifically to you. Our chat interface allows you to ask specific questions and receive clear, concise, and easy-to-understand answers about your personality, potential, relationships, career, and the current planetary influences affecting you.
