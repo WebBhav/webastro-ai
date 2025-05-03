@@ -58,8 +58,14 @@ export default function Home() {
           </div>
         </div>
 
+         {/* Introductory Paragraph */}
+         <p className="container mx-auto mt-16 md:mt-24 text-center text-lg text-muted-foreground max-w-3xl relative z-10 fade-in" style={{ animationDelay: '0.45s' }}>
+            Dive into the fascinating world of astrology with a modern twist. WebAstro AI combines ancient wisdom with intelligent technology to provide you with meaningful, personalized guidance.
+         </p>
+
+
         {/* Why WebAstro AI Section */}
-        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.5s' }}>
+        <section className="container mx-auto mt-8 md:mt-12 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.5s' }}>
           <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">Why WebAstro AI?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Adjusted card styles for dark theme */}
@@ -99,8 +105,14 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Transitional Paragraph */}
+         <p className="container mx-auto mt-16 md:mt-24 text-center text-lg text-muted-foreground max-w-3xl relative z-10 fade-in" style={{ animationDelay: '0.55s' }}>
+            Ready to begin your cosmic exploration? Getting started is simple and secure.
+         </p>
+
+
          {/* How to Get Started Section */}
-        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.6s' }}>
+        <section className="container mx-auto mt-8 md:mt-12 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.6s' }}>
           <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">How to Get Started</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 Card */}
@@ -124,8 +136,13 @@ export default function Home() {
           </div>
         </section>
 
+         {/* Transitional Paragraph */}
+         <p className="container mx-auto mt-16 md:mt-24 text-center text-lg text-muted-foreground max-w-3xl relative z-10 fade-in" style={{ animationDelay: '0.65s' }}>
+            Have more questions? We've answered some common ones below.
+         </p>
+
         {/* FAQs Section */}
-        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10 max-w-3xl" style={{ animationDelay: '0.7s' }}>
+        <section className="container mx-auto mt-8 md:mt-12 text-left space-y-8 fade-in relative z-10 max-w-3xl" style={{ animationDelay: '0.7s' }}>
            <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">Frequently Asked Questions</h2>
            <Accordion type="single" collapsible className="w-full bg-card border border-border/50 rounded-lg p-4 shadow-md">
             <AccordionItem value="item-1">
@@ -165,9 +182,14 @@ export default function Home() {
 
         {/* Final CTA/Message */}
         <section className="container mx-auto mt-16 md:mt-24 text-center relative z-10 fade-in" style={{ animationDelay: '0.8s' }}>
-             <p className="text-muted-foreground max-w-2xl mx-auto">
+             <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> {/* Made text slightly larger */}
              Explore the stars, understand yourself, and navigate your future. Start your astrological journey today with WebAstro AI.
              </p>
+              <Link href="/get-started" passHref className="slide-up inline-block mt-6" style={{ animationDelay: '0.85s' }}> {/* Added another CTA button */}
+               <Button size="lg" className="shadow-lg transform transition hover:scale-105 hover:shadow-xl duration-300 ease-in-out bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Rocket className="mr-2 h-5 w-5" /> Begin Your Journey
+                </Button>
+             </Link>
         </section>
 
       </main> {/* End of main content */}
