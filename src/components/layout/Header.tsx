@@ -86,44 +86,55 @@ export function Header() {
                     </SheetTrigger>
                      {/* Adjusted sheet content background */}
                     <SheetContent side="left" className="w-full max-w-xs bg-background border-border/50 p-6">
-                    {/* Add a visually hidden title for accessibility */}
-                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    {/* Mobile Menu Header */}
-                    <div className="mb-6 flex items-center justify-between">
-                        <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                            <Sparkles className="h-6 w-6 text-accent" />
-                             {/* Adjusted text color */}
-                            <span className="font-bold text-primary">WebAstro AI</span>
-                        </Link>
-                        <SheetClose asChild>
-                             {/* Adjusted button color for dark theme */}
-                            <Button variant="ghost" size="icon" className="text-primary hover:bg-accent/10">
-                            <X className="h-6 w-6" />
-                            <span className="sr-only">Close menu</span>
-                            </Button>
-                        </SheetClose>
-                    </div>
-                    {/* Mobile Menu Links */}
-                    <nav className="flex flex-col gap-4">
-                        {[...NAV_LINKS, CHAT_LINK].map((link) => { // Include Chat link in mobile menu
-                             const isActive = pathname === link.href || (link.href === CHAT_LINK.href && (pathname.startsWith('/get-started') || pathname.startsWith('/chat')));
-                             return (
-                                <SheetClose key={link.href} asChild>
-                                    <Link
-                                        href={link.href}
-                                        className={cn(
-                                            `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-primary hover:bg-accent hover:text-accent-foreground`, // Adjusted base text color
-                                            isActive && "bg-accent/10 font-semibold text-accent" // Active style for mobile
-                                        )}
-                                    >
-                                    {/* Render icon for Chat link in mobile menu */}
-                                    {link.href === CHAT_LINK.href && <MessageSquare className="h-4 w-4" />}
-                                    {link.label}
-                                    </Link>
-                                </SheetClose>
-                            );
-                        })}
-                    </nav>
+                      {/* The SheetContent already includes a close button in the top right */}
+                      {/* No need for an extra SheetClose wrapping the entire nav */}
+                      <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                      {/* Mobile Menu Header */}
+                      <div className="mb-6 flex items-center justify-between">
+                          <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+                              <Sparkles className="h-6 w-6 text-accent" />
+                              {/* Adjusted text color */}
+                              <span className="font-bold text-primary">WebAstro AI</span>
+                          </Link>
+                          {/* The default close button is handled by SheetContent, this one is removed */}
+                          {/* <SheetClose asChild>
+                               <Button variant="ghost" size="icon" className="text-primary hover:bg-accent/10">
+                                <X className="h-6 w-6" />
+                                <span className="sr-only">Close menu</span>
+                              </Button>
+                          </SheetClose> */}
+                      </div>
+                      {/* Mobile Menu Links */}
+                      <nav className="flex flex-col gap-4">
+                          {NAV_LINKS.map((link) => { // Separate regular links from chat button
+                               const isActive = pathname === link.href;
+                               return (
+                                  <SheetClose key={link.href} asChild>
+                                      <Link
+                                          href={link.href}
+                                          className={cn(
+                                              `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-primary hover:bg-accent/10 hover:text-primary`, // Use subtle hover for regular links
+                                              isActive && "font-semibold text-accent" // Active style for regular links
+                                          )}
+                                      >
+                                      {link.label}
+                                      </Link>
+                                  </SheetClose>
+                              );
+                          })}
+                           {/* Mobile Chat Button */}
+                          <SheetClose asChild>
+                             <Link href={CHAT_LINK.href} passHref>
+                               <Button
+                                 variant={"default"} // Use default variant (usually solid background)
+                                 className="w-full justify-start bg-accent text-accent-foreground hover:bg-accent/90" // Style as button
+                                >
+                                 <MessageSquare className="mr-2 h-4 w-4" />
+                                 {CHAT_LINK.label}
+                               </Button>
+                             </Link>
+                          </SheetClose>
+                      </nav>
                     </SheetContent>
                 </Sheet>
             </div>
