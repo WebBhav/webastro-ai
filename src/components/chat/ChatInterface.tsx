@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, Loader2, Sparkles, Zap, BrainCircuit, MessageSquareQuote } from "lucide-react"; // Replaced MessageSquareQuestion with MessageSquareQuote
-import { getAstrologicalInsights } from "@/ai/flows/astrological-insights";
+import { GetAstrologicalInsightsOutput, getAstrologicalInsights } from "@/ai/flows/astrological-insights";
 import { getPromptSuggestions } from "@/ai/flows/prompt-suggestions";
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
@@ -38,6 +38,7 @@ export default function ChatInterface() {
   const [showSuggestions, setShowSuggestions] = useState(false); // Hide suggestions initially until details loaded
   const [birthDetails, setBirthDetails] = useState<BirthDetails | null>(null);
   const [initialLoading, setInitialLoading] = useState(true); // Track initial loading/redirect check
+  const [isInitialInteraction, setIsInitialInteraction] = useState(true); // Track if it's the first user query
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -47,8 +48,8 @@ export default function ChatInterface() {
    const addMessage = useCallback((text: string | React.ReactNode, sender: "user" | "ai", explicitId?: string) => {
     const id = explicitId || `${sender}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     setMessages((prev) => {
-      // Prevent adding duplicate initial welcome messages during strict mode re-renders
-      const welcomeMessageIdentifier = 'Welcome! Using your saved birth details';
+      // Adjusted welcome message identifier slightly to ensure uniqueness
+      const welcomeMessageIdentifier = 'Welcome! Using your saved details';
       if (sender === 'ai' && text && typeof text === 'string' && text.startsWith(welcomeMessageIdentifier)) {
         const existingWelcome = prev.find(msg => typeof msg.text === 'string' && msg.text?.startsWith(welcomeMessageIdentifier));
         if (existingWelcome) return prev; // Don't add another welcome message
@@ -105,9 +106,9 @@ export default function ChatInterface() {
           if (parsedDetails.date && parsedDetails.time && parsedDetails.location && parsedDetails.language) {
             setBirthDetails(parsedDetails);
             detailsLoaded = true;
-            // Updated welcome message
+            // Updated welcome message - removing the long details part
             addMessage(
-              `Welcome! Using your saved birth details (${parsedDetails.date} ${parsedDetails.time}, ${parsedDetails.location}). Ask me anything about your chart!`,
+              `Welcome! Using your saved details. Ask me anything about your chart!`,
               "ai",
               `initial-message-${Date.now()}` // Unique ID for initial message
             );
@@ -159,6 +160,52 @@ export default function ChatInterface() {
     handleSubmit(undefined, prompt);
     setShowSuggestions(false);
   };
+
+   // Helper to format AI response based on whether it's the initial interaction
+   const formatAiResponse = (response: GetAstrologicalInsightsOutput, isFirstInteraction: boolean) => {
+    return (
+      <div className="space-y-3 text-sm text-card-foreground">
+        {response.directAnswer && (
+          <div>
+            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1">
+              <MessageSquareQuote size={16}/> Answer:
+            </h3>
+            <p>{response.directAnswer}</p>
+          </div>
+        )}
+        {/* Only show these sections on the first interaction */}
+        {isFirstInteraction && response.personalityInsights && (
+          <div>
+            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1">
+              <BrainCircuit size={16}/> Personality:
+            </h3>
+            <p>{response.personalityInsights}</p>
+          </div>
+        )}
+        {isFirstInteraction && response.lifePathInsights && (
+          <div>
+            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1">
+              <Zap size={16}/> Life Path:
+            </h3>
+            <p>{response.lifePathInsights}</p>
+          </div>
+        )}
+        {isFirstInteraction && response.currentTransitInsights && (
+          <div>
+            <h3 className="font-semibold text-primary mb-1 flex items-center gap-1">
+              <Sparkles size={16}/> Current Influences:
+            </h3>
+            <p>{response.currentTransitInsights}</p>
+          </div>
+        )}
+        {/* Add a small note if it's not the first interaction and there's no direct answer */}
+        {!isFirstInteraction && !response.directAnswer && (
+             <p className="text-muted-foreground italic">Insight provided. Ask another question for more details.</p>
+        )}
+      </div>
+    );
+  };
+
 
   const handleSubmit = async (event?: FormEvent<HTMLFormElement>, promptText?: string) => {
     event?.preventDefault();
@@ -222,37 +269,16 @@ export default function ChatInterface() {
             language: currentDetails.language, // Pass the language
         });
 
-        // Format the AI response for better readability
-         const formattedResponse = (
-            <div className="space-y-3 text-sm text-card-foreground"> {/* Adjusted text color */}
-                {response.directAnswer && ( // Show direct answer first if available
-                    <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><MessageSquareQuote size={16}/> Answer:</h3> {/* Use MessageSquareQuote */}
-                        <p>{response.directAnswer}</p>
-                    </div>
-                )}
-                 {response.personalityInsights && (
-                    <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><BrainCircuit size={16}/> Personality:</h3>
-                        <p>{response.personalityInsights}</p>
-                    </div>
-                )}
-                {response.lifePathInsights && (
-                     <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Zap size={16}/> Life Path:</h3>
-                        <p>{response.lifePathInsights}</p>
-                    </div>
-                )}
-                {response.currentTransitInsights && (
-                     <div>
-                        <h3 className="font-semibold text-primary mb-1 flex items-center gap-1"><Sparkles size={16}/> Current Influences:</h3>
-                        <p>{response.currentTransitInsights}</p>
-                    </div>
-                )}
-            </div>
-        );
+        // Format the AI response based on interaction state
+         const formattedResponse = formatAiResponse(response, isInitialInteraction);
+
         const aiMessageId = `ai-${Date.now()}-${Math.random().toString(36).substring(7)}`;
         addMessage(formattedResponse, "ai", aiMessageId);
+
+        // Mark subsequent interactions as not initial
+        if (isInitialInteraction) {
+            setIsInitialInteraction(false);
+        }
 
     } catch (error: unknown) {
       // Log the full error object for better debugging
@@ -272,8 +298,10 @@ export default function ChatInterface() {
       });
     } finally {
       setIsLoading(false);
-      // Optionally fetch new suggestions after response, or keep them hidden
-      // fetchSuggestions(); // Uncomment to show new suggestions after AI response
+      // Fetch new suggestions only after the first interaction
+      if (!isInitialInteraction && promptSuggestions.length === 0) {
+         fetchSuggestions();
+      }
     }
   };
 

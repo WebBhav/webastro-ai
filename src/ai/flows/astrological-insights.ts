@@ -36,11 +36,11 @@ const GetAstrologicalInsightsInputSchema = z.object({
     ),
   currentLocation: z.string().describe('The current location.'),
   userQuery: z.string().optional().describe('The specific question the user asked.'),
-  language: z.string().optional().default('English').describe('The language for the response (e.g., "English", "Hindi", "Kannada"). Defaults to English.'), // Updated language options description
+  language: z.string().optional().default('English').describe('The language for the response (e.g., "English", "Hindi", "Kannada"). Defaults to English.'),
 });
 export type GetAstrologicalInsightsInput = z.infer<typeof GetAstrologicalInsightsInputSchema>;
 
-// Output schema remains the same, but the content will be simpler
+// Output schema remains the same, the component will decide what to display
 const GetAstrologicalInsightsOutputSchema = z.object({
   personalityInsights: z.string().describe('Short, simple, easy-to-understand analysis of the user personality (1-2 sentences, beginner-friendly).'),
   lifePathInsights: z.string().describe('Simple, clear guidance about the user life path (1-2 sentences, beginner-friendly).'),
@@ -61,12 +61,14 @@ const prompt = ai.definePrompt({
   output: {
     schema: GetAstrologicalInsightsOutputSchema, // Use the updated output schema
   },
-  // Updated prompt instructions for simplicity, clarity, beginner-friendliness, and language
+  // Updated prompt instructions for simplicity, clarity, beginner-friendliness, language, and "you" perspective.
   prompt: `You are an AI Astrologer explaining insights to someone COMPLETELY NEW to astrology.
 Your goal is to be extremely SIMPLE, CLEAR, and ENCOURAGING.
 ABSOLUTELY NO complex astrological jargon (like aspects, houses, specific planet names unless essential and simply explained).
 Keep each insight VERY SHORT and EASY TO UNDERSTAND (1-2 simple sentences).
 Generate the response in the following language: {{{language}}}.
+
+IMPORTANT: When answering the user's specific question ({{{userQuery}}}), remember that "you", "your", "I", "me" refer to the PERSON whose birth details are provided below, NOT to you, the AI assistant. Frame your answer from the perspective of analyzing THEIR chart.
 
 DO NOT ask for birth details; use the ones provided below.
 
@@ -88,10 +90,10 @@ Based ONLY on the provided birth details and current context, generate the follo
 2.  **Life Path:** Offer simple guidance about their general direction or potential. (e.g., "Learning new things could be really rewarding for you." or "Building strong friendships might be important on your journey.")
 3.  **Current Influences:** Give a very simple hint about the current energy affecting them. (e.g., "It might be a good time to focus on your goals." or "You might feel a bit more thoughtful lately.")
 {{#if userQuery}}
-4.  **Direct Answer:** Directly answer the user's specific question: "{{{userQuery}}}" using extremely simple terms. Avoid complex astrology. Keep it concise and clear.
+4.  **Direct Answer:** Directly answer the user's specific question: "{{{userQuery}}}" using extremely simple terms. Remember to answer about the USER, not yourself. Avoid complex astrology. Keep it concise and clear.
 {{/if}}
 
-Ensure the output matches the required JSON schema format (personalityInsights, lifePathInsights, currentTransitInsights, directAnswer?). Remember: SIMPLE, CLEAR, NO JARGON, 1-2 sentences per section, in {{{language}}}.`,
+Ensure the output matches the required JSON schema format (personalityInsights, lifePathInsights, currentTransitInsights, directAnswer?). Remember: SIMPLE, CLEAR, NO JARGON, 1-2 sentences per section, in {{{language}}}. Address the USER based on their details.`,
 });
 
 
@@ -110,4 +112,3 @@ const astrologicalInsightsFlow = ai.defineFlow<
     return output!;
   }
 );
-
