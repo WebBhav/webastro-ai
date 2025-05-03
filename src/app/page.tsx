@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from 'next/image';
-import { Rocket } from 'lucide-react'; // Changed icon to Rocket
+import { Rocket, Lock, BrainCircuit, Sparkles } from 'lucide-react'; // Import necessary icons
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header"; // Import Header
 
@@ -56,18 +56,18 @@ export default function Home() {
             <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain-circuit"><path d="M12 5a3 3 0 1 0-5.997.142"/><path d="M18 5a3 3 0 1 0-5.997.142"/><path d="M12 13a3 3 0 1 0 5.997-.142"/><path d="M6 13a3 3 0 1 0 5.997-.142"/><path d="M12 21a3 3 0 1 0 .142-5.997"/><path d="M6 5h.01"/><path d="M18 5h.01"/><path d="M12 13h.01"/><path d="M6 13h.01"/><path d="M18 13h.01"/><path d="M12 21v-6"/><path d="M12 5v6"/><path d="M6 5v6.01"/><path d="M18 5v6.01"/><path d="M6 13v2"/><path d="M18 13v2"/><path d="m14.6 10.5-.7-.7"/><path d="m10.1 10.5-.7-.7"/><path d="m14.6 18.5-.7-.7"/><path d="m10.1 18.5-.7-.7"/></svg>
+                  <BrainCircuit className="h-6 w-6 text-accent" /> {/* Use imported icon */}
                   AI-Powered Insights
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Leverage the power of Gemini 2.0 Flash for deep, personalized astrological readings and interpretations. Understand complex astrological concepts easily.</p>
+                <p className="text-muted-foreground">Leverage the power of advanced AI for deep, personalized astrological readings and interpretations. Understand complex astrological concepts easily.</p>
               </CardContent>
             </Card>
              <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+                  <Sparkles className="h-6 w-6 text-accent" /> {/* Use imported icon */}
                   Personalized Guidance
                 </CardTitle>
               </CardHeader>
@@ -78,7 +78,7 @@ export default function Home() {
              <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                   <Lock className="h-6 w-6 text-accent" /> {/* Use imported icon */}
                   Secure & Private
                 </CardTitle>
               </CardHeader>
@@ -88,8 +88,7 @@ export default function Home() {
             </Card>
           </div>
           <div className="text-center text-muted-foreground mt-12">
-              <p>Explore the stars, understand yourself, and navigate your future. Start your astrological journey today with WebAstro AI, the premier AI astrology chat application.</p>
-              <p>Keywords: AI Astrology, Personalized Horoscope, Birth Chart Analysis, Gemini API Astrology, Astrological Insights Chat, Online Astrology Reading, Celestial Guidance AI.</p>
+              <p>Explore the stars, understand yourself, and navigate your future. Start your astrological journey today with WebAstro AI.</p> {/* Removed keyword stuffing */}
           </div>
         </section>
       </main> {/* End of main content */}
