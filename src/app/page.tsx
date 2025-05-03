@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from 'next/image';
@@ -82,7 +83,7 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Your birth details are stored locally in your browser. Your conversations are private. We prioritize your data security.</p>
+                <p className="text-muted-foreground">Your birth details are stored locally in your browser. Your conversations are private. We prioritize your data security. We'll delete the data once the session is over.</p>
               </CardContent>
             </Card>
           </div>
