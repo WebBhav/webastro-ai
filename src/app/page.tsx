@@ -2,9 +2,17 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from 'next/image';
-import { Rocket, Lock, BrainCircuit, Sparkles } from 'lucide-react'; // Import necessary icons
+// Import necessary icons including those for new sections
+import { Rocket, Lock, BrainCircuit, Sparkles, HelpCircle, ListOrdered, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header"; // Import Header
+// Import Accordion components for FAQs
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function Home() {
   return (
@@ -50,7 +58,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* SEO Section */}
+        {/* Why WebAstro AI Section */}
         <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.5s' }}>
           <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">Why WebAstro AI?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -89,14 +97,83 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-          <div className="text-center text-muted-foreground mt-12">
-              <p>Explore the stars, understand yourself, and navigate your future. Start your astrological journey today with WebAstro AI.</p> {/* Removed keyword stuffing */}
+        </section>
+
+         {/* How to Get Started Section */}
+        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10" style={{ animationDelay: '0.6s' }}>
+          <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">How to Get Started</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 1 Card */}
+            <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300 p-6 flex flex-col items-center text-center">
+                <ListOrdered className="h-12 w-12 text-accent mb-4" />
+                <h3 className="text-xl font-semibold text-primary mb-2">Step 1: Provide Details</h3>
+                <p className="text-muted-foreground">Click "Try it now" or "Chat". You'll be asked for your birth date, exact time, location, and preferred language.</p>
+            </Card>
+             {/* Step 2 Card */}
+            <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300 p-6 flex flex-col items-center text-center">
+                 <Rocket className="h-12 w-12 text-accent mb-4" />
+                 <h3 className="text-xl font-semibold text-primary mb-2">Step 2: Start Chatting</h3>
+                 <p className="text-muted-foreground">Once details are saved locally on your device, you'll enter the chatroom. Ask anything about your chart!</p>
+            </Card>
+             {/* Step 3 Card */}
+            <Card className="bg-card text-card-foreground border border-border/50 shadow-md hover:shadow-lg hover:border-accent/60 transition-all duration-300 p-6 flex flex-col items-center text-center">
+                 <MessageSquare className="h-12 w-12 text-accent mb-4" />
+                 <h3 className="text-xl font-semibold text-primary mb-2">Step 3: Explore Insights</h3>
+                 <p className="text-muted-foreground">Receive simple, personalized insights. Ask follow-up questions to dive deeper into your cosmic blueprint.</p>
+            </Card>
           </div>
         </section>
+
+        {/* FAQs Section */}
+        <section className="container mx-auto mt-16 md:mt-24 text-left space-y-8 fade-in relative z-10 max-w-3xl" style={{ animationDelay: '0.7s' }}>
+           <h2 className="text-3xl md:text-4xl font-semibold text-primary text-center">Frequently Asked Questions</h2>
+           <Accordion type="single" collapsible className="w-full bg-card border border-border/50 rounded-lg p-4 shadow-md">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg hover:no-underline text-primary">
+                  <HelpCircle className="inline-block h-5 w-5 mr-2 text-accent" /> Is my data secure?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pl-8">
+                Yes, absolutely. Your birth details (date, time, location, language) are stored only in your browser's local storage. They are not sent to any server except for the AI processing during your active chat session. The data is automatically cleared when your session ends or if you manually clear your browser data.
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+                <AccordionTrigger className="text-lg hover:no-underline text-primary">
+                 <HelpCircle className="inline-block h-5 w-5 mr-2 text-accent" /> What kind of questions can I ask?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pl-8">
+                You can ask about various aspects of your life based on your birth chart. Examples include: "What are my core personality traits?", "Tell me about my potential career paths.", "What energies are influencing my relationships right now?", "Explain my life path in simple terms." Feel free to ask specific questions too!
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+                 <AccordionTrigger className="text-lg hover:no-underline text-primary">
+                 <HelpCircle className="inline-block h-5 w-5 mr-2 text-accent" /> How accurate is this?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pl-8">
+                WebAstro AI uses established astrological principles combined with AI interpretation. It aims to provide insightful guidance based on your birth chart. Think of it as a tool for self-reflection and exploration. Astrological insights are subjective and best used for personal growth, not as definitive predictions.
+                </AccordionContent>
+            </AccordionItem>
+             <AccordionItem value="item-4" className="border-b-0"> {/* Remove border from last item */}
+                 <AccordionTrigger className="text-lg hover:no-underline text-primary">
+                  <HelpCircle className="inline-block h-5 w-5 mr-2 text-accent" /> Do I need to know astrology?
+                 </AccordionTrigger>
+                 <AccordionContent className="text-muted-foreground pl-8">
+                 Not at all! WebAstro AI is designed to be beginner-friendly. It avoids complex jargon and explains insights in simple, easy-to-understand language. Just bring your curiosity!
+                 </AccordionContent>
+             </AccordionItem>
+           </Accordion>
+        </section>
+
+        {/* Final CTA/Message */}
+        <section className="container mx-auto mt-16 md:mt-24 text-center relative z-10 fade-in" style={{ animationDelay: '0.8s' }}>
+             <p className="text-muted-foreground max-w-2xl mx-auto">
+             Explore the stars, understand yourself, and navigate your future. Start your astrological journey today with WebAstro AI.
+             </p>
+        </section>
+
       </main> {/* End of main content */}
 
       {/* Footer */}
-     <footer className="w-full mt-16 md:mt-24 py-6 border-t border-border/50 fade-in relative z-10" style={{ animationDelay: '0.6s' }}> {/* Ensure footer is above stars */}
+     <footer className="w-full mt-16 md:mt-24 py-6 border-t border-border/50 fade-in relative z-10" style={{ animationDelay: '0.9s' }}> {/* Ensure footer is above stars */}
         <div className="container mx-auto text-center text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} WebAstro AI. All rights reserved.</p>
         </div>
