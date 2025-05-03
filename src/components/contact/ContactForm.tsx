@@ -58,45 +58,28 @@ export function ContactForm() {
   // Function to handle form submission
   const handleFormSubmit = (data: ContactFormValues) => {
     setIsLoading(true);
-    console.log('Contact Form Submitted:', data);
+    console.log('Contact Form Submitted (Logged Locally):', data);
 
-    // --- Placeholder for actual submission ---
-    // In a real application, you would send this data to your backend API
-    // which would then handle sending the email.
-    // Example:
-    // try {
-    //   const response = await fetch('/api/contact', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(data),
-    //   });
-    //   if (!response.ok) throw new Error('Network response was not ok');
-    //   // Handle success
-    //   setIsSubmitted(true);
-    //   toast({ title: "Message Sent!", description: "Thanks for reaching out. We'll get back to you soon." });
-    //   form.reset(); // Reset form on success
-    // } catch (error) {
-    //   console.error('Error submitting contact form:', error);
-    //   toast({ title: 'Error', description: 'Could not send your message. Please try again or email us directly.', variant: 'destructive' });
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    // --- End Placeholder ---
+    // --- No actual backend submission ---
+    // We will log the data and provide a mailto link
 
-    // Simulate submission delay and success for demo purposes
+    // Simulate a short delay as if processing
     setTimeout(() => {
         setIsSubmitted(true);
         toast({
-            title: "Message Logged (Demo)",
-            description: "Your message details have been logged to the console. See below for direct email.",
+            title: "Form Data Prepared",
+            description: "Please click the link below to open your email client and send the message.",
         });
         setIsLoading(false);
-         form.reset(); // Reset form on successful simulation
-    }, 1500); // Simulate network delay
+         // Don't reset the form immediately so the mailto link can use the values
+    }, 500); // Short delay
   };
 
-  // Generate mailto link
-  const generateMailtoLink = (data: ContactFormValues) => {
+  // Generate mailto link using current form values
+  const generateMailtoLink = () => {
+    const data = form.getValues(); // Get current form values
+    if (!data.name || !data.email || !data.message) return "#"; // Prevent link generation if form invalid/empty
+
     const subject = encodeURIComponent(`Contact Form Submission from ${data.name}`);
     const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`);
     return `mailto:vaibhavsinghal2808@gmail.com?subject=${subject}&body=${body}`;
@@ -117,7 +100,7 @@ export function ContactForm() {
                 <Input
                   placeholder="e.g., Ada Lovelace"
                   {...field}
-                  disabled={isLoading || isSubmitted}
+                  disabled={isLoading || isSubmitted} // Keep disabled after submission to prevent changes before clicking mailto
                    className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                 />
               </FormControl>
@@ -138,7 +121,7 @@ export function ContactForm() {
                   placeholder="e.g., ada@example.com"
                   {...field}
                   type="email"
-                  disabled={isLoading || isSubmitted}
+                  disabled={isLoading || isSubmitted} // Keep disabled
                    className="bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                 />
               </FormControl>
@@ -160,7 +143,7 @@ export function ContactForm() {
                   className="resize-none bg-secondary/50 border-border/60 text-foreground placeholder:text-muted-foreground"
                   rows={5}
                   {...field}
-                  disabled={isLoading || isSubmitted}
+                  disabled={isLoading || isSubmitted} // Keep disabled
                 />
               </FormControl>
                <FormDescription className="text-muted-foreground/80"> {/* Adjusted description color */}
@@ -171,40 +154,45 @@ export function ContactForm() {
           )}
         />
 
-        {/* Adjusted button style */}
+        {/* Submit Button - Changed label */}
         <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isLoading || isSubmitted}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending...
+              Preparing...
             </>
           ) : isSubmitted ? (
-            'Message Sent!'
+            'Open Email Client Below' // Changed text after submission
           ) : (
              <>
-               <Send className="mr-2 h-4 w-4" /> Send Message
+               <Send className="mr-2 h-4 w-4" /> Prepare Email
              </>
           )}
         </Button>
 
-        {/* Display after submission (for demo) */}
+        {/* Display after submission */}
         {isSubmitted && (
             // Adjusted alert style for dark theme
-            <Alert variant="default" className="mt-6 bg-secondary/50 border-accent/50 text-accent">
+            <Alert variant="default" className="mt-6 bg-secondary/50 border-accent/50 text-accent fade-in">
               <Mail className="h-4 w-4 text-accent" />
-              <AlertTitle className="text-accent font-semibold">Thank You!</AlertTitle>
+              <AlertTitle className="text-accent font-semibold">Ready to Send!</AlertTitle>
               <AlertDescription className="text-accent/90">
-                Your message has been logged (see browser console). For a real email, please click the link below to open your email client:
+                Your message details have been logged locally (see browser console).
                 <br />
                  <a
-                    href={generateMailtoLink(form.getValues())}
-                    target="_blank"
+                    href={generateMailtoLink()} // Generate link on render
+                    target="_blank" // Opens in new tab/email client usually
                     rel="noopener noreferrer"
                     className="underline font-medium mt-2 inline-block hover:text-accent/80" // Adjusted hover color
+                    onClick={() => {
+                      // Optionally reset form after clicking the link
+                      // form.reset();
+                      // setIsSubmitted(false); // Allow submitting again?
+                    }}
                 >
-                    Click here to email us directly
+                    Click here to open your email client and send the message
                 </a>
-                 <p className="mt-2 text-xs">Alternatively, email: vaibhavsinghal2808@gmail.com</p>
+                 <p className="mt-2 text-xs">Alternatively, manually email: vaibhavsinghal2808@gmail.com</p>
               </AlertDescription>
             </Alert>
         )}
