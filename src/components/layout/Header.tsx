@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation'; // Import usePathname
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet"; // Use Sheet for mobile menu, import SheetTitle
-import { Sparkles, Menu, X, MessageSquare } from "lucide-react"; // Remove unused icons (Home, Info, Mail), Add MessageSquare
+import { Sparkles, Menu, MessageSquare } from "lucide-react"; // Remove unused icons (X), Add MessageSquare
 import { cn } from "@/lib/utils"; // Import cn for conditional classes
 
 // Updated Navigation Links - Removed icons
@@ -28,8 +28,8 @@ export function Header() {
   return (
     // Adjusted header style for dark theme
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Added pl-4 for left padding */}
-      <div className="container pl-4 flex h-14 max-w-screen-2xl items-center justify-between"> {/* Changed to justify-between */}
+      {/* Added pl-4 for left padding and pr-4 for right padding */}
+      <div className="container pl-4 pr-4 flex h-14 max-w-screen-2xl items-center justify-between"> {/* Changed to justify-between */}
         {/* Logo and Brand */}
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Sparkles className="h-6 w-6 text-accent" />
@@ -38,7 +38,7 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation & Chat Button */}
         <div className="flex flex-1 items-center justify-end"> {/* Wrap nav and button */}
             <nav className="hidden items-center gap-6 text-sm md:flex mr-6"> {/* Added margin-right */}
             {NAV_LINKS.map((link) => {
@@ -97,6 +97,12 @@ export function Header() {
                               <span className="font-bold text-primary">WebAstro AI</span>
                           </Link>
                           {/* The default close button is handled by SheetContent, rendered top right */}
+                           <SheetClose asChild>
+                             <Button variant="ghost" size="icon" className="text-primary hover:bg-accent/10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x h-4 w-4"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                               <span className="sr-only">Close</span>
+                             </Button>
+                           </SheetClose>
                       </div>
                       {/* Mobile Menu Links */}
                       <nav className="flex flex-col gap-4">
@@ -107,8 +113,8 @@ export function Header() {
                                       <Link
                                           href={link.href}
                                           className={cn(
-                                              `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-primary hover:bg-accent/10 hover:text-primary`, // Use subtle hover for regular links
-                                              isActive ? "text-primary font-semibold" : "text-primary/60" // Apply active/inactive style
+                                              `flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium hover:bg-accent/10 hover:text-primary`, // Use subtle hover for regular links
+                                              isActive ? "text-primary font-semibold bg-accent/10" : "text-primary/60" // Apply active/inactive style
                                           )}
                                       >
                                       {link.label}
